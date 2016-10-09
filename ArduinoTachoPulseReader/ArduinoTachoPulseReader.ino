@@ -1,8 +1,8 @@
 //communication interval in microsecond.
-#define COMM_INTERVAL 16000
+#define COMM_INTERVAL 16600
 //Speed,Tacho pulse reset time (in microsecond)
-#define SPEED_PULSE_EXPIRE_TIME 500000
-#define TACHO_PULSE_EXPIRE_TIME 500000
+#define SPEED_PULSE_EXPIRE_TIME 1000000
+#define TACHO_PULSE_EXPIRE_TIME 1000000
 
 //AnalogRead Oversampling count (1:No oversample)
 #define OVERSAMPLE_COUNT 4
@@ -99,16 +99,16 @@ void send(){
 
 
   //Send
-  Serial.print("SP");
+  Serial.print("S");
   Serial.print(speedPulseCycle);
-  Serial.print(" TA");
+  Serial.print("\nT");
   Serial.print(tachoPulseCycle);
   for(i = 0; i<=5; i++)
   {
-    Serial.print(" A");
-    Serial.print(i);
+    Serial.print("\n");
+    char tagLetter = 'A' + i;
+    Serial.print(tagLetter);
     Serial.print(analogReadVal[i]);
   }
   Serial.print("\n");
 }
-

@@ -6,13 +6,13 @@
 #define Serial_Baudrate 9600
 
 //Define PIN
-#define speedPin 2
-#define tachoPin 3
+#define speedPin 3
+#define tachoPin 2
 #define speedAnalogVolumePin 0
 #define tachoAnalogVolumePin 1
 
 //Define Analog read interval in microsecond
-#define AnalogReadInterval 1000000UL
+#define AnalogReadInterval 200000UL
 
 int speed = 0;
 int tacho = 0;
@@ -30,26 +30,33 @@ int tachoPinState = LOW;
 void analogReadAndSetSpeedTacho()
 {
   //Set speed
-  speed = map(analogRead(speedAnalogVolumePin), 0, 1023, 1, 300);
-  //speedPulseInterval = 3600/(637*speed*PULSE_PER_SPEED_REV) * 1E6;
-  speedPulseInterval = 5651491UL/(speed*PULSE_PER_SPEED_REV);
+  speed = map(analogRead(speedAnalogVolumePin), 0, 1023, 0, 300);
+  if(speed != 0 )
+    //speedPulseInterval = 3600/(637*speed*PULSE_PER_SPEED_REV) * 1E6;
+    speedPulseInterval = 5651491UL/(speed*PULSE_PER_SPEED_REV);
+  else
+    speedPulseInterval = 0;
+  
   speedPulseInterval /= 2;
   
   //Set tacho
-  tacho = map(analogRead(tachoAnalogVolumePin), 0, 1023, 1, 10000);
+  tacho = map(analogRead(tachoAnalogVolumePin), 0, 1023, 0, 10000);
   //tachoPulseInterval = 60/(PULSE_PER_TACHO_REV*tacho) * 1E6;
-  tachoPulseInterval = 60000000UL/(PULSE_PER_TACHO_REV*tacho);
+  if(tacho != 0)
+    tachoPulseInterval = 60000000UL/(PULSE_PER_TACHO_REV*tacho);
+  else
+    tachoPulseInterval = 0;
   
   tachoPulseInterval /= 2; 
 }
 
 //Out current tacho/speed to serialPort
-void serialOut(int _speed, int _tacho)
+void serialOut()
 {
   Serial.print("Speed:");
-  Serial.print(_speed);
+  Serial.print(speed);
   Serial.print(" Tacho:");
-  Serial.println(_tacho);
+  Serial.println(tacho);
 }
 
 // the setup routine runs once when you press reset:
@@ -61,7 +68,7 @@ void setup() {
   Serial.begin(Serial_Baudrate);
   
   analogReadAndSetSpeedTacho();
-  serialOut(speed, tacho);
+  serialOut();
   digitalWrite(speedPin, speedPinState);
   digitalWrite(tachoPin, tachoPinState);
 
@@ -84,7 +91,7 @@ void loop() {
   if(analogReadElapsedTime > AnalogReadInterval) 
   {
     analogReadAndSetSpeedTacho();
-    serialOut(speed, tacho);
+    serialOut();
     analogReadBeforeTime = nowTime;
   }
   
@@ -93,18 +100,20 @@ void loop() {
     speedPulseElapsedTime = nowTime - speedPulseBeforeTime;
   else
     speedPulseElapsedTime = nowTime + 4294967295UL - speedPulseBeforeTime;
-  
   if(speedPulseElapsedTime > speedPulseInterval) 
   {
-    if(speedPinState == LOW)
+    if(speedPulseInterval != 0) //Speed is not zero
     {
-      speedPinState = HIGH;
-      digitalWrite(speedPin, speedPinState);
-    }
-    else
-    {
-      speedPinState = LOW;
-      digitalWrite(speedPin, speedPinState);
+      if(speedPinState == LOW)
+      {
+        speedPinState = HIGH;
+        digitalWrite(speedPin, speedPinState);
+      }
+      else
+      {
+        speedPinState = LOW;
+        digitalWrite(speedPin, speedPinState);
+      }
     }
     speedPulseBeforeTime = nowTime;
   }
@@ -117,15 +126,18 @@ void loop() {
   
   if(tachoPulseElapsedTime > tachoPulseInterval) 
   {
-    if(tachoPinState == LOW)
+    if(tachoPulseInterval != 0)
     {
-      tachoPinState = HIGH;
-      digitalWrite(tachoPin, tachoPinState);
-    }
-    else
-    {
-      tachoPinState = LOW;
-      digitalWrite(tachoPin, tachoPinState);
+      if(tachoPinState == LOW)
+      {
+        tachoPinState = HIGH;
+        digitalWrite(tachoPin, tachoPinState);
+      }
+      else
+      {
+        tachoPinState = LOW;
+        digitalWrite(tachoPin, tachoPinState);
+      }
     }
     tachoPulseBeforeTime = nowTime;
   }
