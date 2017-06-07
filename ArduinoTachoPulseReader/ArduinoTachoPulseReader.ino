@@ -4,6 +4,10 @@
 #define SPEED_PULSE_EXPIRE_TIME 1000000
 #define TACHO_PULSE_EXPIRE_TIME 1000000
 
+//Serial baudrate
+#define SERIAL_BAUD_RATE 9600
+//#define SERIAL_BAUD_RATE 38400
+
 //AnalogRead Oversampling count (1:No oversample)
 #define OVERSAMPLE_COUNT 4
 
@@ -29,7 +33,7 @@ void setup() {
   attachInterrupt(tachoPin, interruptTachoPulse, RISING);
 
   //SerialPort setting
-  Serial.begin(38400);  
+  Serial.begin(SERIAL_BAUD_RATE);  
 }
 
 void interruptSpeedPulse()
