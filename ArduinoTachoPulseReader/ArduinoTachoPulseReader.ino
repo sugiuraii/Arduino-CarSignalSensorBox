@@ -44,11 +44,13 @@
 //AnalogRead Oversampling count (1:No oversample)
 #define OVERSAMPLE_COUNT 4
 
-int speedPin = 0;
+int speedPin = 2;
+int speedInterrupt = 0;
 volatile unsigned long speedPulseBeforeTime=0;
 volatile unsigned long speedPulseElapsedTime=0;
 
-int tachoPin = 1;
+int tachoPin = 3;
+int tachoInterrupt = 1;
 volatile unsigned long tachoPulseBeforeTime=0;
 volatile unsigned long tachoPulseElapsedTime=0;
 
@@ -62,8 +64,8 @@ void setup() {
   pinMode(speedPin, INPUT_PULLUP);
   pinMode(tachoPin, INPUT_PULLUP);
   
-  attachInterrupt(speedPin, interruptSpeedPulse, RISING);
-  attachInterrupt(tachoPin, interruptTachoPulse, RISING);
+  attachInterrupt(speedInterrupt, interruptSpeedPulse, RISING);
+  attachInterrupt(tachoInterrupt, interruptTachoPulse, RISING);
 
   //SerialPort setting
   Serial.begin(SERIAL_BAUD_RATE);  
