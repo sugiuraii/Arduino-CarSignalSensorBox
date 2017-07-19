@@ -1,6 +1,6 @@
 # Arduino Pulse counter / ADC reader
 
-##Table of contents
+## Table of contents
 * [Description](#description)
 * [System diagram](#system_diagram)
 * [Requirement](#requirement)
