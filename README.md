@@ -5,6 +5,9 @@
 * [System diagram](#system_diagram)
 * [Requirement](#requirement)
 * [Install](#install)
+* [Connection to sensors](#connect_sensor)
+* [Appendix](#appendix)
+* [License](#license)
 
 ## <a name="description"> Description</a>
 This program (arduino sketch) measure pulse interval, read ADC and send the pulse interval and ADC reading to PC via serial port (on USB).
@@ -15,7 +18,7 @@ The pulse counter/adc reader program consists of only 1 sketch file of `ArduinoT
 
 (`debugTool/ArduinoTachoPulseGenerator/ArduinoTachoPulseGenerator.ino` is debug tool to generate pulse. This can bes used to check the operation of `ArduinoTachoPulseReader.ino`).
 
-Please note that the this program simply send pulse 
+Please note that the this program simply send (speed/rev) pulse cycle time (in microsecond), and ADC reading voltage (5V=4096). Conversion from cycle/ADCreading to physical value (rpm, kPa, or degC) is done in PC-side [ArduinoCOM_Websocket_Server](https://github.com/sugiuraii/DefiSSMCOM_WebsocketServer) program.
 
 ## <a name="system_diagram"> System diagram </a>
 ![WebsocketDiagram](README.img/WebsocketDashboardArduino.png)
@@ -25,6 +28,43 @@ Please note that the this program simply send pulse
 * Arduino IDE
 
 ## <a name="install">Install</a>
-Simply compile `ArduinoTachoPulseReader/ArduinoTachoPulseReader.ino`
+Simply compile `ArduinoTachoPulseReader/ArduinoTachoPulseReader.ino` in Arduino IDE, and transfer to Arduino board.
 
+## <a name="connect_sensor"> Connection to sensors </a>
+This program itself do not care about the sensor type and ADC port. However, [ArduinoCOM_Websocket_Server](https://github.com/sugiuraii/DefiSSMCOM_WebsocketServer) program assumes that sensors are connected on following ports. If you use this program for [ArduinoCOM_Websocket_Server](https://github.com/sugiuraii/DefiSSMCOM_WebsocketServer), please follow port assignment described below.
+
+* Vehicle speed pulse : Digital port 2 (INT0)
+* Engine rev pulse : Digital port 3 (INT1)
+* Boost sensor : Analog input 0 (A0)
+	* [ArduinoCOM_Websocket_Server](https://github.com/sugiuraii/DefiSSMCOM_WebsocketServer) assumes that Autogauge boost sensor (EBOSD-SENSOR, 9BBO000) is connected on this port.
+* Water temperature sensor : Analog input 1 (A1)
+* Oil temperature senosor : Analog input 2 (A2)
+* Secondary Oil temperature sensor : Analog input 3 (A3)
+	* [ArduinoCOM_Websocket_Server](https://github.com/sugiuraii/DefiSSMCOM_WebsocketServer) assumes that Autogauge temperature sensors (9BTP000/3747-SENSOR) are connected on these port.
+* A4, A5 : Currently not assigned.
+
+![Sensor Connection](README.img/SensorConnection.png)
+
+## <a name="appendix"> Appendix </a>
+
+### Serial port data format
+This program send the pulse cycle and ADC reading with follwoing format.
+
+```
+Sxxxx (xxxx -> pulse cycle on INT0(digital pin 2) in microsecond)
+Txxxx (xxxx -> pulse cycle on INT1(digital pin 3) in microsecond)
+Axxxx (xxxx -> ADC reding on A0 port (4096=5V))
+Bxxxx (xxxx -> ADC reding on A1 port (4096=5V))
+Cxxxx (xxxx -> ADC reding on A2 port (4096=5V))
+Dxxxx (xxxx -> ADC reding on A3 port (4096=5V))
+Exxxx (xxxx -> ADC reding on A4 port (4096=5V))
+Fxxxx (xxxx -> ADC reding on A5 port (4096=5V))
+Sxxxx
+Txxxx
+Axxxx
+...
+```
+
+## <a name="license"> License </a>
+[BSD 3-Clause License](./LICENSE)
 
