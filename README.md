@@ -5,7 +5,7 @@
 * [System diagram](#system_diagram)
 * [Requirement](#requirement)
 * [Install](#install)
-* [Connection to sensors](#connect_sensor)
+* [Connect sensors](#connect_sensor)
 * [Appendix](#appendix)
 * [License](#license)
 
@@ -21,6 +21,8 @@ The pulse counter/adc reader program consists of only 1 sketch file of `ArduinoT
 Please note that the this program simply send (speed/rev) pulse cycle time (in microsecond), and ADC reading voltage (5V=4096). Conversion from cycle/ADCreading to physical value (rpm, kPa, or degC) is done in PC-side [ArduinoCOM_Websocket_Server](https://github.com/sugiuraii/DefiSSMCOM_WebsocketServer) program.
 
 ## <a name="system_diagram"> System diagram </a>
+This program correspond to the red-squared portion of following websocket dashboard gauge system diagram.
+
 ![WebsocketDiagram](README.img/WebsocketDashboardArduino.png)
 
 ## <a name="requirement"> Requirement </a>
@@ -30,8 +32,10 @@ Please note that the this program simply send (speed/rev) pulse cycle time (in m
 ## <a name="install">Install</a>
 Simply compile `ArduinoTachoPulseReader/ArduinoTachoPulseReader.ino` in Arduino IDE, and transfer to Arduino board.
 
-## <a name="connect_sensor"> Connection to sensors </a>
-This program itself do not care about the sensor type and ADC port. However, [ArduinoCOM_Websocket_Server](https://github.com/sugiuraii/DefiSSMCOM_WebsocketServer) program assumes that sensors are connected on following ports. If you use this program for [ArduinoCOM_Websocket_Server](https://github.com/sugiuraii/DefiSSMCOM_WebsocketServer), please follow port assignment described below.
+## <a name="connect_sensor"> Connect sensors </a>
+This program itself do not care about which sensors connected on Arduino analog/digital ports.
+However, [ArduinoCOM_Websocket_Server](https://github.com/sugiuraii/DefiSSMCOM_WebsocketServer) program assumes sensors are connected on following ports assignment.
+If you use this program with [ArduinoCOM_Websocket_Server](https://github.com/sugiuraii/DefiSSMCOM_WebsocketServer), please follow port assignment described below.
 
 * Vehicle speed pulse : Digital port 2 (INT0)
 * Engine rev pulse : Digital port 3 (INT1)
