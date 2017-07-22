@@ -47,7 +47,9 @@ If you use this program with [ArduinoCOM_Websocket_Server](https://github.com/su
 	* [ArduinoCOM_Websocket_Server](https://github.com/sugiuraii/DefiSSMCOM_WebsocketServer) assumes that Autogauge temperature sensors (9BTP000/3747-SENSOR) are connected on these port.
 * A4, A5 : Currently not assigned.
 
-![Sensor Connection](README.img/SensorConnection.png)
+![Sensor Connection1](README.img/SensorConnection1.png)
+![Sensor Connection2](README.img/SensorConnection2.png)
+![Sensor Connection3](README.img/SensorConnection3.png)
 
 ## <a name="appendix"> Appendix </a>
 
