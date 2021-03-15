@@ -1,6 +1,6 @@
 #include "ADCRead.h"
 
-static int analogReadVal[6];
+static int analogReadVal[NUM_ADC_CHANNELS];
 //AnalogRead Oversampling count (1:No oversample)
 constexpr int OVERSAMPLE_COUNT = 4;
 

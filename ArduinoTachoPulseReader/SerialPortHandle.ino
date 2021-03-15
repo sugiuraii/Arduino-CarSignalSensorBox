@@ -1,5 +1,6 @@
 #include "SerialPortHandle.h"
 #include "TachoSpeedPulse.h"
+#include "ADCRead.h"
 
 //Serial baudrate
 //constexpr unsigned long SERIAL_BAUD_RATE = 9600;
@@ -26,7 +27,7 @@ void sendSerialMsg()
     //Send serial
     if (commElapsedTime > COMM_INTERVAL)
     {
-        sendSerialMsgInternal(getSpeedPulseElapsedTime(nowTime), getTachoPulseElapsedTime(nowTime), analogReadVal, numAnalogReadVals);
+        sendSerialMsgInternal(getSpeedPulseElapsedTime(nowTime), getTachoPulseElapsedTime(nowTime), getAnalogReadVal(), NUM_ADC_CHANNELS);
         commBeforeTime = nowTime;
     }
 }

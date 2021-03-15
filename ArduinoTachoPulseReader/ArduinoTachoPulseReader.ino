@@ -33,8 +33,7 @@
 #include "ArduinoTachoPulseReader.h"
 #include "TachoSpeedPulse.h"
 #include "SerialPortHandle.h"
-
-
+#include "ADCRead.h"
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -44,9 +43,7 @@ void setup() {
 
 // the loop routine runs over and over again forever:
 void loop() {
-  int i,j;  
-
-  
-  
+  updateAnalogReadVal();
+  sendSerialMsg();    
 }
 
