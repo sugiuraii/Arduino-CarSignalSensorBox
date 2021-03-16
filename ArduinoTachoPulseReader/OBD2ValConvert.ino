@@ -24,7 +24,7 @@ uint8_t convertToVechicleOBDSpeed(unsigned long speedPulseElapsedTime)
     if(speedPulseElapsedTime == 0)
         return 0;
     else
-        return (3600*1000000) / (637*speedPulseElapsedTime*NumPulsePerSpd);
+        return (3600*1000000UL) / (637*speedPulseElapsedTime*NumPulsePerSpd);
 }
 
 // Return EngineRPM * 4
@@ -33,7 +33,7 @@ uint16_t convertToOBDEngineREV(unsigned long tachoPluseElapsedTime)
     if(tachoPluseElapsedTime == 0)
         return 0;
     else
-        return (60*1000000*4) / (NumPulsePerRev*tachoPluseElapsedTime);
+        return (60*1000000UL*4) / (NumPulsePerRev*tachoPluseElapsedTime);
 }
 
 uint8_t convertToOBDManifoldAbsPressure(int boostADCVal)
