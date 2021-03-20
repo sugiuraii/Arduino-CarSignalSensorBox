@@ -11,13 +11,13 @@ constexpr int BoostADCCoeff = 100;
 
 // Water/Oil temp sensor Constants
 // This parameter are derived from Autogauge water/oil temp sensor (9BTP000 3747-SENSOR)
-constexpr double WATER_THERMISTOR_R0 = 1306; //Thermistor resistance at 25degC
-constexpr double WATER_THERMISTOR_B = 3529;
-constexpr double OIL_THERMISTOR_R0 = 1306; //Thermistor resistance at 25degC
-constexpr double OIL_THERMISTOR_B = 3529;
+constexpr float WATER_THERMISTOR_R0 = 1306; //Thermistor resistance at 25degC
+constexpr float WATER_THERMISTOR_B = 3529;
+constexpr float OIL_THERMISTOR_R0 = 1306; //Thermistor resistance at 25degC
+constexpr float OIL_THERMISTOR_B = 3529;
 // Thermistor current sense reisistance (inserted in series with the thermistor)
-constexpr double WATER_THERMISTOR_SENSE_R = 100;
-constexpr double OIL_THERMISTOR_SENSE_R = 100;
+constexpr float WATER_THERMISTOR_SENSE_R = 100;
+constexpr float OIL_THERMISTOR_SENSE_R = 100;
 
 uint8_t convertToVechicleOBDSpeed(unsigned long speedPulseElapsedTime)
 {
@@ -43,24 +43,24 @@ uint8_t convertToOBDManifoldAbsPressure(int boostADCVal)
 
 uint8_t convertToOBDCoolantTemperature(int waterTempADCVal)
 {
-    double WaterTempThermistorSerialResistance = WATER_THERMISTOR_SENSE_R;
-    double THERMISTOR_B = WATER_THERMISTOR_B;
-    double THERMISTOR_R0 = WATER_THERMISTOR_R0;
+    float WaterTempThermistorSerialResistance = WATER_THERMISTOR_SENSE_R;
+    float THERMISTOR_B = WATER_THERMISTOR_B;
+    float THERMISTOR_R0 = WATER_THERMISTOR_R0;
 
-    double R = (double)(waterTempADCVal * WaterTempThermistorSerialResistance) / (double)(ADC_STEP - waterTempADCVal);
-    double T = THERMISTOR_B/(log(R/THERMISTOR_R0)+THERMISTOR_B/298.15);
-    double Tdeg = T - 273.15;
+    float R = (float)(waterTempADCVal * WaterTempThermistorSerialResistance) / (float)(ADC_STEP - waterTempADCVal);
+    float T = THERMISTOR_B/(logf(R/THERMISTOR_R0)+THERMISTOR_B/298.15);
+    float Tdeg = T - 273.15;
     return Tdeg + 40;
 }
 
 uint8_t convertToOBDEngineOILTemperature(int oilTempADCVal)
 {
-    double WaterTempThermistorSerialResistance = OIL_THERMISTOR_SENSE_R;
-    double THERMISTOR_B = OIL_THERMISTOR_B;
-    double THERMISTOR_R0 = OIL_THERMISTOR_R0;
+    float WaterTempThermistorSerialResistance = OIL_THERMISTOR_SENSE_R;
+    float THERMISTOR_B = OIL_THERMISTOR_B;
+    float THERMISTOR_R0 = OIL_THERMISTOR_R0;
 
-    double R = (double)(oilTempADCVal * WaterTempThermistorSerialResistance) / (double)(ADC_STEP - oilTempADCVal);
-    double T = THERMISTOR_B/(log(R/THERMISTOR_R0)+THERMISTOR_B/298.15);
-    double Tdeg = T - 273.15;
+    float R = (float)(oilTempADCVal * WaterTempThermistorSerialResistance) / (float)(ADC_STEP - oilTempADCVal);
+    float T = THERMISTOR_B/(logf(R/THERMISTOR_R0)+THERMISTOR_B/298.15);
+    float Tdeg = T - 273.15;
     return Tdeg + 40;
 }
