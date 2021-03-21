@@ -131,18 +131,47 @@ void handleCANMessage()
 
 int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID)
 {
-  const byte valByteLength = pgm_read_byte(PIDByteLengthMap + requestedPID);
-  if (valByteLength == 0)
+  int *analogReadVal = getAnalogReadVal();
+  switch (requestedPID)
+  {
+  case 0x05: // PID 0x05 = Engine coolant temperature
+  {
+    int adcCoolant = analogReadVal[1];
+    returnBuf[3] = convertToOBDCoolantTemperature(adcCoolant);
+    return NOERROR;
+  }
+  break;
+  case 0x0B: // PID 0x0B = Manofold absoulte pressure
+  {
+    int adcManifoldPres = analogReadVal[0];
+    returnBuf[3] = convertToOBDManifoldAbsPressure(adcManifoldPres);
+    return NOERROR;
+  }
+  break;
+  case 0x0C: // PID 0x0C = Engine speed (rpm)
+  {
+    unsigned long nowTime = micros();
+    unsigned long rpmPulseTime = getTachoPulseElapsedTime(nowTime);
+    uint16_t rpmOBDVal = convertToOBDEngineREV(rpmPulseTime);
+    returnBuf[3] = (byte)((rpmOBDVal & 0xFF00) >> 8);
+    returnBuf[4] = (byte)((rpmOBDVal & 0x00FF));
+    return NOERROR;
+  }
+  break;
+  case 0x0D: // PID 0x0D = Vehicle speeds
+  {
+    unsigned long nowTime = micros();
+    unsigned long vspeedPulseTime = getSpeedPulseElapsedTime(nowTime);
+    byte speedOBDDVal = convertToVechicleOBDSpeed(vspeedPulseTime);
+    returnBuf[3] = speedOBDDVal;
+    return NOERROR;
+  }
+  break;
+  default:
+    // Requested PID is not match
     return PID_NOT_AVAILABLE;
-
-  const byte returnByteLength = valByteLength + 2; // PID data length + PIDcode(1byte) + serviceModde(1byte)
-  returnBuf[0] = returnByteLength;
-
-  const unsigned int PIDAddressOffset = pgm_read_word(PIDAddressMap + requestedPID);
-  for (int i = 0; i < valByteLength; i++)
-    returnBuf[i + 3] = PID_Value_Map[PIDAddressOffset + i];
-
-  return NOERROR;
+    break;
+  }
 }
 
 // Build available PID message (AvailablePID = 0x05, 0x0B, 0x0C, 0x0D, 0x5C)
@@ -151,32 +180,32 @@ void buildAvailablePIDMessage(byte *returnBuf, uint8_t requestedPID)
   const byte valByteLength = 4;
   const byte returnByteLength = valByteLength + 2;
   returnBuf[0] = returnByteLength;
-  switch(requestedPID)
+  switch (requestedPID)
   {
-    case 0x00:      
-      returnBuf[3] = 0x08;
-      returnBuf[4] = 0x38;
-      returnBuf[5] = 0x00;
-      returnBuf[6] = 0x01;
-      break;
-    case 0x20:      
-      returnBuf[3] = 0x00;
-      returnBuf[4] = 0x00;
-      returnBuf[5] = 0x00;
-      returnBuf[6] = 0x01;
-      break;
-    case 0x40:
-      returnBuf[3] = 0x00;
-      returnBuf[4] = 0x00;
-      returnBuf[5] = 0x00;
-      returnBuf[6] = 0x10;
-      break;
-    default:
-      returnBuf[3] = 0x00;
-      returnBuf[4] = 0x00;
-      returnBuf[5] = 0x00;
-      returnBuf[6] = 0x00;
-      if(CANMSG_ERROR)
-        Serial.println(F("Invaild PID is requested on buildAvailanblePIDMessage."));
+  case 0x00:
+    returnBuf[3] = 0x08;
+    returnBuf[4] = 0x38;
+    returnBuf[5] = 0x00;
+    returnBuf[6] = 0x01;
+    break;
+  case 0x20:
+    returnBuf[3] = 0x00;
+    returnBuf[4] = 0x00;
+    returnBuf[5] = 0x00;
+    returnBuf[6] = 0x01;
+    break;
+  case 0x40:
+    returnBuf[3] = 0x00;
+    returnBuf[4] = 0x00;
+    returnBuf[5] = 0x00;
+    returnBuf[6] = 0x10;
+    break;
+  default:
+    returnBuf[3] = 0x00;
+    returnBuf[4] = 0x00;
+    returnBuf[5] = 0x00;
+    returnBuf[6] = 0x00;
+    if (CANMSG_ERROR)
+      Serial.println(F("Invaild PID is requested on buildAvailanblePIDMessage."));
   }
 }
