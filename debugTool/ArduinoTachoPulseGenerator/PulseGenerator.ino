@@ -46,7 +46,6 @@ void handlePulse()
     //Timer counter for pulse
     static unsigned long speedPulseBeforeTime = 0;
     static unsigned long tachoPulseBeforeTime = 0;
-    static unsigned long analogReadBeforeTime = 0;
     static int speedPinState = LOW;
     static int tachoPinState = LOW;
 
