@@ -38,16 +38,18 @@
 #define Serial_Baudrate 9600
 
 //Define PIN
-#define speedPin 3
-#define tachoPin 2
+#define speedPin 4
+#define tachoPin 8
 #define speedAnalogVolumePin 0
 #define tachoAnalogVolumePin 1
 
 //Define Analog read interval in microsecond
 #define AnalogReadInterval 200000UL
 
-int speed = 0;
-int tacho = 0;
+// Global variables to set pulse/PWM
+unsigned int speed = 0;
+unsigned int tacho = 0;
+
 unsigned long speedPulseInterval = 0;
 unsigned long tachoPulseInterval = 0;
 
