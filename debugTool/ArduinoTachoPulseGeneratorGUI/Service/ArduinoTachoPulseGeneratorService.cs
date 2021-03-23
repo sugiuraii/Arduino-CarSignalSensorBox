@@ -110,13 +110,18 @@ namespace ArduinoTachoPulseGeneratorGUI.Service
 
         public uint GetMaxValue(WriteValueType type)
         {
-            if(type == WriteValueType.Tacho || type == WriteValueType.Speed)
-                return 65535;
+            if(type == WriteValueType.Tacho)
+                return 32768;
+            else if(type == WriteValueType.Speed)
+                return 255;
             else
                 return 255;
         }
         public void WriteValue(WriteValueType type, uint value)
         {
+            if(this.RunningState == false || serialPort == null)
+                return;
+
             switch (type)
             {
                 case WriteValueType.Tacho:
