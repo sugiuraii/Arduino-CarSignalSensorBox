@@ -8,7 +8,7 @@ using System.IO;
 
 namespace ArduinoTachoPulseGeneratorGUI.Service
 {
-    public enum ValueType
+    public enum WriteValueType
     {
         Tacho,
         Speed,
@@ -108,46 +108,53 @@ namespace ArduinoTachoPulseGeneratorGUI.Service
             logger.LogInformation("Serial port closed.");
         }
 
-        public void WriteValue(ValueType type, uint value)
+        public uint GetMaxValue(WriteValueType type)
+        {
+            if(type == WriteValueType.Tacho || type == WriteValueType.Speed)
+                return 65535;
+            else
+                return 255;
+        }
+        public void WriteValue(WriteValueType type, uint value)
         {
             switch (type)
             {
-                case ValueType.Tacho:
+                case WriteValueType.Tacho:
                     if (value > 65535)
                         throw new ArgumentException(type.ToString() + " value out of range.");
                     serialPort.Write("T" + value.ToString("D5"));
                     break;
-                case ValueType.Speed:
+                case WriteValueType.Speed:
                     if (value > 65535)
                         throw new ArgumentException(type.ToString() + " value out of range.");
                     serialPort.Write("S" + value.ToString("D5"));
                     break;
-                case ValueType.Analog3:
+                case WriteValueType.Analog3:
                     if (value > 255)
                         throw new ArgumentException(type.ToString() + " value out of range.");
                     serialPort.Write("A" + value.ToString("D5"));
                     break;
-                case ValueType.Analog5:
+                case WriteValueType.Analog5:
                     if (value > 255)
                         throw new ArgumentException(type.ToString() + " value out of range.");
                     serialPort.Write("B" + value.ToString("D5"));
                     break;
-                case ValueType.Analog6:
+                case WriteValueType.Analog6:
                     if (value > 255)
                         throw new ArgumentException(type.ToString() + " value out of range.");
                     serialPort.Write("C" + value.ToString("D5"));
                     break;
-                case ValueType.Analog9:
+                case WriteValueType.Analog9:
                     if (value > 255)
                         throw new ArgumentException(type.ToString() + " value out of range.");
                     serialPort.Write("D" + value.ToString("D5"));
                     break;
-                case ValueType.Analog10:
+                case WriteValueType.Analog10:
                     if (value > 255)
                         throw new ArgumentException(type.ToString() + " value out of range.");
                     serialPort.Write("E" + value.ToString("D5"));
                     break;
-                case ValueType.Analog11:
+                case WriteValueType.Analog11:
                     if (value > 255)
                         throw new ArgumentException(type.ToString() + " value out of range.");
                     serialPort.Write("F" + value.ToString("D5"));
