@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
 using ArduinoTachoPulseGeneratorGUI.Service;
+using ArduinoTachoPulseGeneratorGUI.Model;
 
 namespace ArduinoTachoPulseGeneratorGUI
 {
@@ -25,6 +26,7 @@ namespace ArduinoTachoPulseGeneratorGUI
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<ArduinoTachoPulseGeneratorService>();
+            services.AddSingleton<ArduinoTachoPulseGeneratorGUIModel>();
         }
 
         public async void ElectronBootstrap()
