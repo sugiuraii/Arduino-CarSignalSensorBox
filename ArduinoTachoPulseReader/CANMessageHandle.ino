@@ -137,6 +137,7 @@ int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID)
   case 0x05: // PID 0x05 = Engine coolant temperature
   {
     int adcCoolant = analogReadVal[1];
+    returnBuf[0] = 1 + 2; // Return 1byte
     returnBuf[3] = convertToOBDCoolantTemperature(adcCoolant);
     return NOERROR;
   }
@@ -144,6 +145,7 @@ int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID)
   case 0x0B: // PID 0x0B = Manofold absoulte pressure
   {
     int adcManifoldPres = analogReadVal[0];
+    returnBuf[0] = 1 + 2; // Return 1byte
     returnBuf[3] = convertToOBDManifoldAbsPressure(adcManifoldPres);
     return NOERROR;
   }
@@ -153,6 +155,7 @@ int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID)
     unsigned long nowTime = micros();
     unsigned long rpmPulseTime = getTachoPulseElapsedTime(nowTime);
     uint16_t rpmOBDVal = convertToOBDEngineREV(rpmPulseTime);
+    returnBuf[0] = 2 + 2; // Return 2byte
     returnBuf[3] = (byte)((rpmOBDVal & 0xFF00) >> 8);
     returnBuf[4] = (byte)((rpmOBDVal & 0x00FF));
     return NOERROR;
@@ -163,6 +166,7 @@ int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID)
     unsigned long nowTime = micros();
     unsigned long vspeedPulseTime = getSpeedPulseElapsedTime(nowTime);
     byte speedOBDDVal = convertToVechicleOBDSpeed(vspeedPulseTime);
+    returnBuf[0] = 1 + 2; // Return 2byte
     returnBuf[3] = speedOBDDVal;
     return NOERROR;
   }
