@@ -45,7 +45,7 @@ namespace ArduinoTachoPulseGeneratorGUI.Service
                 logger.LogInformation("Serial port open.");
                 logger.LogInformation("Portname : " + portName);
                 serialPort = new SerialPort(portName);
-                serialPort.BaudRate = 9600;
+                serialPort.BaudRate = 115200;
                 serialPort.NewLine = "\n";
                 serialPort.Open();
                 logger.LogInformation("BaudRate is " + serialPort.BaudRate.ToString());
