@@ -6,7 +6,6 @@
 void initializeCAN();
 void handleCANMessage();
 
-constexpr int CAN_PAYLOAD_LENGTH = 8;
 extern mcp2515_can CAN;
 
 #endif
