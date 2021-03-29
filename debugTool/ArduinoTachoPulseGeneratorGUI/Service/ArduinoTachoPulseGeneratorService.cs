@@ -50,7 +50,7 @@ namespace ArduinoTachoPulseGeneratorGUI.Service
                 serialPort.Open();
                 logger.LogInformation("BaudRate is " + serialPort.BaudRate.ToString());
 
-                WaitReceivingECUSimReady();
+                WaitArduinoReady();
 
                 // Enable SerialPort input logging
                 serialPort.DataReceived += (sender, e) =>
@@ -76,7 +76,7 @@ namespace ArduinoTachoPulseGeneratorGUI.Service
             }
         }
 
-        private void WaitReceivingECUSimReady()
+        private void WaitArduinoReady()
         {
             logger.LogInformation("Waiting initialize OK message....");
             while (true)
