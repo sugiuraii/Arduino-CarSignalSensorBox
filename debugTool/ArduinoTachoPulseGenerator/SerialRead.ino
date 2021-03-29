@@ -4,7 +4,7 @@
 
 void flushSerialInbuf();
 
-constexpr unsigned long baudrate = 9600;
+constexpr unsigned long baudrate = 115200;
 constexpr int SerialMSGLength = 6; // 5digits + 1header
 
 void setupSerial()
@@ -14,6 +14,9 @@ void setupSerial()
 
 void handleSerial()
 {
+    if(Serial.available() < SerialMSGLength)
+        return;
+    
     char header = (char)Serial.read();
     String valString;
     
