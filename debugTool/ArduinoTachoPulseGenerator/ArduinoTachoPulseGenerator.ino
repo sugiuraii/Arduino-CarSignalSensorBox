@@ -35,6 +35,7 @@
 void setup() {
   setupSerial();
   setupPulse();
+  Serial.println(F("Initialize ok!"));
 }
 
 // the loop routine runs over and over again forever:
