@@ -31,7 +31,7 @@
 */
 
 #include "ArduinoTachoPulseReader.h"
-#include "TachoSpeedPulse.h"
+#include "TachoSpeedPulseCounter.h"
 #include "SerialPortDump.h"
 #include "ADCRead.h"
 #include "OBD2ValConvert.h"

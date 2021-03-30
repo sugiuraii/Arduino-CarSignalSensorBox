@@ -1,5 +1,5 @@
-#ifndef TACHO_SPEED_PULSE_H
-#define TACHO_SPEED_PULSE_H
+#ifndef TACHO_SPEED_PULSE_COUNTER_H
+#define TACHO_SPEED_PULSE_COUNTER_H
 
 #include "ArduinoTachoPulseReader.h"
 

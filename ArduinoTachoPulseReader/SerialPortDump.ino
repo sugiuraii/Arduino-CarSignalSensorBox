@@ -1,5 +1,5 @@
 #include "SerialPortDump.h"
-#include "TachoSpeedPulse.h"
+#include "TachoSpeedPulseCounter.h"
 #include "ADCRead.h"
 
 //Serial dump interval in microsecond.

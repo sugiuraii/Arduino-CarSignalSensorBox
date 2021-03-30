@@ -1,7 +1,7 @@
 #include "CANMesasgeHandle.h"
 #include "OBD2ValConvert.h"
 #include "ADCRead.h"
-#include "TachoSpeedPulse.h"
+#include "TachoSpeedPulseCounter.h"
 
 int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID);
 void buildAvailablePIDMessage(byte *returnBuf, uint8_t requestedPID);
