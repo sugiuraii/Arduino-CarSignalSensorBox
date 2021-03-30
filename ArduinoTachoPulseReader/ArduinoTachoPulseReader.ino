@@ -32,7 +32,7 @@
 
 #include "ArduinoTachoPulseReader.h"
 #include "TachoSpeedPulse.h"
-#include "SerialPortHandle.h"
+#include "SerialPortDump.h"
 #include "ADCRead.h"
 #include "OBD2ValConvert.h"
 #include "CANMesasgeHandle.h"
@@ -53,7 +53,7 @@ void setup() {
 // the loop routine runs over and over again forever:
 void loop() {
   updateAnalogReadVal();
-  sendSerialMsg();
+  sendSerialDumpMsg();
   if (CAN.checkReceive() == CAN_MSGAVAIL)
     handleCANMessage();
 }
