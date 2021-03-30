@@ -2,6 +2,7 @@
 #include "OBD2ValConvert.h"
 #include "ADCRead.h"
 #include "TachoSpeedPulseCounter.h"
+#include "SensorADCPinAssign.h"
 
 int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID);
 void buildAvailablePIDMessage(byte *returnBuf, uint8_t requestedPID);
@@ -93,7 +94,7 @@ void handleCANMessage()
   const uint8_t returnServiceMode = serviceMode + 0x40;
   byte returnBuf[8] = {0x00, returnServiceMode, requestedPID, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-  if ((requestedPID % 0x20) == 0) // Return supported PID flag mode (=> get data from PIDAvailableFlagMap in PROGMEM)
+  if ((requestedPID % 0x20) == 0) // Return supported PID flag mode
     buildAvailablePIDMessage(returnBuf, requestedPID);
   else // Return value mode (=> get data from PID_Value_Map in RAM)
   {
@@ -136,7 +137,7 @@ int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID)
   {
   case 0x05: // PID 0x05 = Engine coolant temperature
   {
-    int adcCoolant = analogReadVal[1];
+    int adcCoolant = analogReadVal[WATERTEMP_ADC_PIN];
     returnBuf[0] = 1 + 2; // Return 1byte
     returnBuf[3] = convertToOBDCoolantTemperature(adcCoolant);
     return NOERROR;
@@ -144,7 +145,7 @@ int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID)
   break;
   case 0x0B: // PID 0x0B = Manofold absoulte pressure
   {
-    int adcManifoldPres = analogReadVal[0];
+    int adcManifoldPres = analogReadVal[BOOST_ADC_PIN];
     returnBuf[0] = 1 + 2; // Return 1byte
     returnBuf[3] = convertToOBDManifoldAbsPressure(adcManifoldPres);
     return NOERROR;
@@ -168,6 +169,14 @@ int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID)
     byte speedOBDDVal = convertToVechicleOBDSpeed(vspeedPulseTime);
     returnBuf[0] = 1 + 2; // Return 2byte
     returnBuf[3] = speedOBDDVal;
+    return NOERROR;
+  }
+  break;
+  case 0x5C: // PID 0x5C = Engine oil temperature
+  {
+    int adcOilTemp = analogReadVal[OILTEMP_ADC_PIN];
+    returnBuf[0] = 1 + 2; // Return 1byte
+    returnBuf[3] = convertToOBDEngineOILTemperature(adcOilTemp);
     return NOERROR;
   }
   break;
