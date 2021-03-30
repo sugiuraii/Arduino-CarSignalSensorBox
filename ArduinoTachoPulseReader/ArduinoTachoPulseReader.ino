@@ -37,10 +37,16 @@
 #include "OBD2ValConvert.h"
 #include "CANMesasgeHandle.h"
 
+void initializeSerialPort();
+
+//Serial baudrate
+constexpr unsigned long SERIAL_BAUD_RATE = 38400;
+
 // the setup routine runs once when you press reset:
 void setup() {
+  initializeSerialPort();
   tachoSpeedPinSetup();
-  setupSerialPort();
+
   initializeCAN();
 }
 
@@ -52,3 +58,8 @@ void loop() {
     handleCANMessage();
 }
 
+void initializeSerialPort()
+{
+    //SerialPort setting
+    Serial.begin(SERIAL_BAUD_RATE);
+}

@@ -2,18 +2,8 @@
 #include "TachoSpeedPulse.h"
 #include "ADCRead.h"
 
-//Serial baudrate
-//constexpr unsigned long SERIAL_BAUD_RATE = 9600;
-constexpr unsigned long SERIAL_BAUD_RATE = 38400;
-
 //communication interval in microsecond.
 constexpr unsigned int COMM_INTERVAL=16600;
-
-void setupSerialPort()
-{
-    //SerialPort setting
-    Serial.begin(SERIAL_BAUD_RATE);
-}
 
 void sendSerialMsg()
 {
