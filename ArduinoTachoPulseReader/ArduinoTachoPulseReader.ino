@@ -36,6 +36,7 @@
 #include "ADCRead.h"
 #include "OBD2ValConvert.h"
 #include "CANMesasgeHandle.h"
+#include "SerialPortInteractive.h"
 
 void initializeSerialPort();
 
@@ -43,23 +44,38 @@ void initializeSerialPort();
 constexpr unsigned long SERIAL_BAUD_RATE = 38400;
 
 // the setup routine runs once when you press reset:
-void setup() {
+void setup()
+{
   initializeSerialPort();
   tachoSpeedPinSetup();
 
-  initializeCAN();
+  if (CAN_OBD_ENABLE)
+    initializeCAN();
 }
 
 // the loop routine runs over and over again forever:
-void loop() {
+void loop()
+{
   updateAnalogReadVal();
-  sendSerialDumpMsg();
-  if (CAN.checkReceive() == CAN_MSGAVAIL)
-    handleCANMessage();
+
+  if (SERIAL_DUMP_ENABLE)
+    sendSerialDumpMsg();
+
+  if (SERIAL_INTERACTIVE_ENABLE)
+  {
+    if (Serial.available() > 0)
+      listenSerialInteractiveCommand();
+  }
+
+  if (CAN_OBD_ENABLE)
+  {
+    if (CAN.checkReceive() == CAN_MSGAVAIL)
+      handleCANMessage();
+  }
 }
 
 void initializeSerialPort()
 {
-    //SerialPort setting
-    Serial.begin(SERIAL_BAUD_RATE);
+  //SerialPort setting
+  Serial.begin(SERIAL_BAUD_RATE);
 }
