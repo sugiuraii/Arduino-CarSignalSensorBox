@@ -1,21 +1,11 @@
-#include "SerialPortHandle.h"
-#include "TachoSpeedPulse.h"
+#include "SerialPortDump.h"
+#include "TachoSpeedPulseCounter.h"
 #include "ADCRead.h"
 
-//Serial baudrate
-//constexpr unsigned long SERIAL_BAUD_RATE = 9600;
-constexpr unsigned long SERIAL_BAUD_RATE = 38400;
+//Serial dump interval in microsecond.
+constexpr unsigned int SERIAL_DUMP_INTERVAL=16600;
 
-//communication interval in microsecond.
-constexpr unsigned int COMM_INTERVAL=16600;
-
-void setupSerialPort()
-{
-    //SerialPort setting
-    Serial.begin(SERIAL_BAUD_RATE);
-}
-
-void sendSerialMsg()
+void sendSerialDumpMsg()
 {
     static unsigned long commBeforeTime = 0;
     unsigned long nowTime = micros();
@@ -25,14 +15,14 @@ void sendSerialMsg()
     else
         commElapsedTime = nowTime - commBeforeTime;
     //Send serial
-    if (commElapsedTime > COMM_INTERVAL)
+    if (commElapsedTime > SERIAL_DUMP_INTERVAL)
     {
-        sendSerialMsgInternal(getSpeedPulseElapsedTime(nowTime), getTachoPulseElapsedTime(nowTime), getAnalogReadVal(), NUM_ADC_CHANNELS);
+        sendSerialDumpInternal(getSpeedPulseElapsedTime(nowTime), getTachoPulseElapsedTime(nowTime), getAnalogReadVal(), NUM_ADC_CHANNELS);
         commBeforeTime = nowTime;
     }
 }
 
-void sendSerialMsgInternal(const unsigned long speedPulseElapsedTime, const unsigned long tachoPulseElapsedTime, const int *analogReadVal, const int numAnalogReadVals)
+void sendSerialDumpInternal(const unsigned long speedPulseElapsedTime, const unsigned long tachoPulseElapsedTime, const int *analogReadVal, const int numAnalogReadVals)
 {
     //Send
     Serial.print("S");

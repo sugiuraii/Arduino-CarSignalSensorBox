@@ -1,7 +1,5 @@
-#ifndef TACHO_SPEED_PULSE_H
-#define TACHO_SPEED_PULSE_H
-
-#include "ArduinoTachoPulseReader.h"
+#ifndef TACHO_SPEED_PULSE_COUNTER_H
+#define TACHO_SPEED_PULSE_COUNTER_H
 
 void tachoSpeedPinSetup();
 inline unsigned long getSpeedPulseElapsedTime(const unsigned long nowTime);

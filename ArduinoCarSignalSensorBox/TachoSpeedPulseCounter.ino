@@ -1,4 +1,4 @@
-#include "TachoSpeedPulse.h"
+#include "TachoSpeedPulseCounter.h"
 
 //Speed,Tacho pulse reset time (in microsecond)
 constexpr unsigned long SPEED_PULSE_EXPIRE_TIME = 1000000;
