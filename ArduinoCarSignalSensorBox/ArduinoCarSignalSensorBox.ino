@@ -30,7 +30,7 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ArduinoTachoPulseReader.h"
+#include "ArduinoCarSignalSensorBox.h"
 #include "TachoSpeedPulseCounter.h"
 #include "SerialPortDump.h"
 #include "ADCRead.h"
