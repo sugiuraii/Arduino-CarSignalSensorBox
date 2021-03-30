@@ -28,7 +28,7 @@ uint8_t convertToVechicleOBDSpeed(unsigned long speedPulseElapsedTime)
 }
 
 // Return EngineRPM * 4
-uint16_t convertToOBDEngineREV(unsigned long tachoPluseElapsedTime)
+uint16_t convertToOBDEngineREVx4(unsigned long tachoPluseElapsedTime)
 {
     if(tachoPluseElapsedTime == 0)
         return 0;

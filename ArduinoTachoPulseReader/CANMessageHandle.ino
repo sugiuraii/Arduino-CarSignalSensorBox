@@ -154,7 +154,7 @@ int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID)
   {
     unsigned long nowTime = micros();
     unsigned long rpmPulseTime = getTachoPulseElapsedTime(nowTime);
-    uint16_t rpmOBDVal = convertToOBDEngineREV(rpmPulseTime);
+    uint16_t rpmOBDVal = convertToOBDEngineREVx4(rpmPulseTime);
     returnBuf[0] = 2 + 2; // Return 2byte
     returnBuf[3] = (byte)((rpmOBDVal & 0xFF00) >> 8);
     returnBuf[4] = (byte)((rpmOBDVal & 0x00FF));
