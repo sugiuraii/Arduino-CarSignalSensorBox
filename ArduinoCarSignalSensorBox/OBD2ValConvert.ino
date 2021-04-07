@@ -7,7 +7,7 @@ constexpr int NumPulsePerSpd = 4;
 constexpr int ADC_STEP = 4096; // 10bits(1024) * 4 sample
 constexpr int ADC_REF_VOLTAGE = 5;
 
-constexpr int BoostADCCoeff = 100;
+constexpr float BoostADCCoeff = 100;
 
 // Water/Oil temp sensor Constants
 // This parameter are derived from Autogauge water/oil temp sensor (9BTP000 3747-SENSOR)
