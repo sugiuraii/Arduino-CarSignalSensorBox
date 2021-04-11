@@ -1,0 +1,92 @@
+@page "/pulsegencontroller"
+@namespace ECUSimGUI.Pages
+@using ArduinoTachoPulseGeneratorGUI.Model
+@using System.ComponentModel
+@inject ArduinoTachoPulseGeneratorGUIModel Model
+@inject IJSRuntime JsRuntime;
+@implements IDisposable
+
+<h1>ArduinoTachoPulseGeneratorGUI</h1>
+
+<div>
+    <h2>Startup</h2>
+    <label>COMPort name:</label>
+    <input type="text" id="comportNameInput" @bind-value="Model.COMPortName.Value" @bind-value:event="oninput" />
+    <button class="btn btn-primary" id="btnStart" @onclick="StartCommand" disabled="@(!Model.StartButtonEnabled.Value)" >Start</button>
+    <button class="btn btn-secondary" id="btnStop" @onclick="StopCommand" disabled="@(!Model.StopButtonEnabled.Value)" >Stop</button>
+</div>
+
+<div>
+    <h2>Set value</h2>
+    <p>
+        <label>Tacho</label>
+        <input type="range" min="0" max="@Model.TachoMax" style="width:80%" @bind="Model.TachoValue.Value" @bind:event="oninput" />
+        <label>@Model.TachoValue.Value</label>
+    </p>
+    <p>
+        <label>Speed</label>
+        <input type="range" min="0" max="@Model.SpeedMax" style="width:80%" @bind="Model.SpeedValue.Value" @bind:event="oninput" />
+        <label>@Model.SpeedValue.Value</label>
+    </p>
+    <p>
+        <label>Analog3</label>
+        <input type="range" min="0" max="@Model.Analog3Max" style="width:80%" @bind="Model.Analog3Value.Value" @bind:event="oninput" />
+        <label>@Model.Analog3Value.Value</label>
+    </p>
+    <p>
+        <label>Analog5</label>
+        <input type="range" min="0" max="@Model.Analog5Max" style="width:80%" @bind="Model.Analog5Value.Value" @bind:event="oninput" />
+        <label>@Model.Analog5Value.Value</label>
+    </p>
+    <p>
+        <label>Analog6</label>
+        <input type="range" min="0" max="@Model.Analog6Max" style="width:80%" @bind="Model.Analog6Value.Value" @bind:event="oninput" />
+        <label>@Model.Analog6Value.Value</label>
+    </p>
+    <p>
+        <label>Analog9</label>
+        <input type="range" min="0" max="@Model.Analog9Max" style="width:80%" @bind="Model.Analog9Value.Value" @bind:event="oninput" />
+        <label>@Model.Analog9Value.Value</label>
+    </p>
+    <p>
+        <label>Analog10</label>
+        <input type="range" min="0" max="@Model.Analog10Max" style="width:80%" @bind="Model.Analog10Value.Value" @bind:event="oninput" />
+        <label>@Model.Analog10Value.Value</label>
+    </p>
+    <p>
+        <label>Analog11</label>
+        <input type="range" min="0" max="@Model.Analog11Max" style="width:80%" @bind="Model.Analog11Value.Value" @bind:event="oninput" />
+        <label>@Model.Analog11Value.Value</label>
+    </p>
+</div>
+
+
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Model.PropertyChanged += StateChanged;
+        Model.CommunicateErrorOccured += CommunicationErrorOccured; 
+    }
+    private void StateChanged(object s, PropertyChangedEventArgs e)
+    {
+        InvokeAsync(() => StateHasChanged());
+    }
+    private void CommunicationErrorOccured(object s, Exception e)
+    {
+        JsRuntime.InvokeAsync<bool>("alert", e.Message);
+    }
+
+    public void Dispose()
+    {
+        Model.PropertyChanged -= StateChanged;
+    }
+    private void StartCommand()
+    {
+        Model.StartCommand.Execute();
+    }
+    private void StopCommand()
+    {
+        Model.StopCommand.Execute();
+    }
+}
