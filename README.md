@@ -39,7 +39,7 @@ This sketch needs following hardwares.
 	* MCP2515 board is not required on disabling CAN communication features. Don't forget to disable CAN feature by setting `CAN_OBD_ENABLE = false` in [`ArduinoCarSignalSensorBox.h`](ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.h). (otherwise, the program stops on initializing MCP2515)
 * Boost pressure sensor is requred to handle turbo boost (intake manifold) pressure, 
 	* Connect to A0 port.
-	* Autogauge boost sensor(9BBO000/EBOSD-SENSOR) is implemented by default (This outputs voltage of 1V/100kPa). Modify [`OBD2ValCovert.ino`](ArduinoCarSignalSensorBox/OBD2ValCovert.ino) to use other types of sensors.
+	* Autogauge boost sensor(9BBO000/EBOSD-SENSOR) is implemented by default (This outputs voltage of 1V/100kPa). Modify [`OBD2ValCovert.ino`](ArduinoCarSignalSensorBox/OBD2ValConvert.ino) to use other types of sensors.
 		* For Autogauge sensor, connect red wire to +12V, black wire to GND, and white wire to A0 port.
 * Temperature sensor is requried to handle engine coolant/oil temperature.
 	* Connect to A1 (for engine coolant temperature), A2 (for engine oil temperature).
