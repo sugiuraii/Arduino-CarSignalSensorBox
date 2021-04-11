@@ -53,7 +53,7 @@ This sketch needs following hardwares.
 
 ## <a name="softsetup">Software(sketch) setup</a>
 ### Setup communication mode
-Before compiling the sketch, check and modify [`ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.h`](`ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.h`) to set the communicationmode.
+Before compiling the sketch, check and modify [`ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.h`](ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.h) to set the communicationmode.
 
 (See [Communication Mode](#communicationmode) for the detail.)
 ```
