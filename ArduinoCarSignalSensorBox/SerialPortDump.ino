@@ -29,7 +29,7 @@ void sendSerialDumpInternal(const unsigned long speedPulseElapsedTime, const uns
     Serial.print(speedPulseElapsedTime);
     Serial.print("\nT");
     Serial.print(tachoPulseElapsedTime);
-    for (int i = 0; i <= numAnalogReadVals; i++)
+    for (int i = 0; i < numAnalogReadVals; i++)
     {
         Serial.print("\n");
         char tagLetter = 'A' + i;
