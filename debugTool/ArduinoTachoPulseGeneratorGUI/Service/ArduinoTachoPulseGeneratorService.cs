@@ -114,16 +114,17 @@ namespace ArduinoTachoPulseGeneratorGUI.Service
 
         public void CommunicateStop()
         {
-            logger.LogInformation("Serial port closing.");
+            logger.LogInformation("Ending serial port communication.");
             if (serialPort != null)
             {
+                logger.LogInformation("Serial port closing.");
                 serialPort.Close();
                 serialPort.Dispose();
+                logger.LogInformation("Serial port closed.");
             }
             this.RunningState = false;
             if (CommunicateStateChanged != null)
                 CommunicateStateChanged(this, RunningState);
-            logger.LogInformation("Serial port closed.");
         }
 
         public uint GetMaxValue(WriteValueType type)
