@@ -9,6 +9,9 @@
 * [Dependencies](#dependencies)
 * [License](#license)
 
+## Notice
+To use this sketch for [WebSocketGaugeServer](https://github.com/sugiuraii/WebSocketGaugeServer), please see [SensorBox_For_WebsocketGaugeServer.md](SensorBox_For_WebsocketGaugeServer.md).
+
 ## <a name="about">About</a>
 This program (arduino sketch) reads automotive sensor, and send the sensor information by USB-serial port or CAN.
 
@@ -56,7 +59,7 @@ This sketch needs following hardwares.
 Before compiling the sketch, check and modify [`ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.h`](ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.h) to set the communicationmode.
 
 (See [Communication Mode](#communicationmode) for the detail.)
-```
+```c++
 constexpr bool SERIAL_DUMP_ENABLE = false; // Set true to enable "Serial dump" mode.
 constexpr bool SERIAL_INTERACTIVE_ENABLE = false; // Set true to enable "Serial interactive" mode.
 constexpr bool CAN_OBD_ENABLE = true; // Set true to enable "CAN OBDII" mode.
@@ -67,7 +70,7 @@ constexpr bool CAN_OBD_ENABLE = true; // Set true to enable "CAN OBDII" mode.
     * Install zip library file on ArduinoIDE, or copy all of the contents of `src` directory (at the library zip file) to `ArduinoCarSignalSensorBox/` directory. 
 ### Set XTAL frequency and CAN baud rate.
  * Check and modify the argument of `CAN.begin(CAN_250KBPS, MCP_8MHZ)` in [`ArduinoCarSignalSensorBox/CANMessageHandle.ino`](ArduinoCarSignalSensorBox/CANMessageHandle.ino), follwoing CAN baudrate and the frequency of XTAL of MCP2515 board.
-```
+```c++
 void initializeCAN()
 {
   bool initSucess = false;
