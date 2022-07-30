@@ -10,7 +10,7 @@
 * [License](#license)
 
 ## Notice
-To use this sketch for [WebSocketGaugeServer](https://github.com/sugiuraii/WebSocketGaugeServer), please see [SensorBox_For_WebsocketGaugeServer.md](SensorBox_For_WebsocketGaugeServer.md).
+To use this sketch for [WebSocketGaugeServer](https://github.com/sugiuraii/WebSocketGaugeServer), please see [SensorBox_For_WebSocketGaugeServer.md](SensorBox_For_WebSocketGaugeServer.md).
 
 ## <a name="about">About</a>
 This program (arduino sketch) reads automotive sensor, and send the sensor information by USB-serial port or CAN.
