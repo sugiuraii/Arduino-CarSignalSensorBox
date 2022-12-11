@@ -19,6 +19,9 @@ constexpr bool CANMSG_DEBUG = false;
 constexpr bool CANMSG_ERROR = true;
 constexpr bool CANMSG_FATAL = true;
 
+// Output CAN handle time (for debug and performance analysis)
+constexpr bool CANMSG_TIME_MEAS = false;
+
 // Return code of buildPIDValueMessage
 constexpr int NOERROR = 0;
 constexpr int PID_NOT_AVAILABLE = -1;
@@ -45,6 +48,10 @@ void initializeCAN()
 
 void handleCANMessage()
 {
+  unsigned long canMsgHandleStartTime;
+  if (CANMSG_TIME_MEAS)
+    canMsgHandleStartTime = micros();
+
   if (CANMSG_DEBUG)
     Serial.println(F("CAN message handle start."));
 
@@ -120,6 +127,12 @@ void handleCANMessage()
   // Send CAN return message.
   CAN.sendMsgBuf(ECU_CAN_RESPONSE_ID, 0, 8, returnBuf);
 
+  if(CANMSG_TIME_MEAS)
+  {
+    Serial.print(F("CAN message handle time (micros): "));
+    Serial.println(micros() - canMsgHandleStartTime);
+  }
+  
   if (CANMSG_DEBUG)
   {
     Serial.print(F("Return byte length: "));
