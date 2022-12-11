@@ -11,7 +11,8 @@ mcp2515_can CAN(10); // CAN CS: pin 10
 constexpr int CAN_PAYLOAD_LENGTH = 8;
 
 // ECU (this controller) CAN ID
-constexpr unsigned long ECU_CAN_ID = 0x7E8;
+constexpr unsigned long ECU_CAN_ID = 0x7E0;
+constexpr unsigned long ECU_CAN_RESPONSE_ID = ECU_CAN_ID + 0x008;
 
 // Debug message serial out switch
 constexpr bool CANMSG_DEBUG = false;
@@ -108,7 +109,7 @@ void handleCANMessage()
   }
 
   // Send CAN return message.
-  CAN.sendMsgBuf(ECU_CAN_ID, 0, 8, returnBuf);
+  CAN.sendMsgBuf(ECU_CAN_RESPONSE_ID, 0, 8, returnBuf);
 
   if (CANMSG_DEBUG)
   {
