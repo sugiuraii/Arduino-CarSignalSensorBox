@@ -59,7 +59,7 @@ namespace ArduinoTachoPulseGeneratorGUI
 
             loggerFactory.AddMemory();
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
