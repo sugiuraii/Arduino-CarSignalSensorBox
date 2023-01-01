@@ -7,7 +7,11 @@
 * [Software(sketch) setup](#softsetup)
 * [Communication mode](#communicationmode)
 * [Dependencies](#dependencies)
+* [Advanced features](#advancedfeatures)
 * [License](#license)
+
+## Notice
+To use this sketch for [WebSocketGaugeServer](https://github.com/sugiuraii/WebSocketGaugeServer), please see [SensorBox_For_WebSocketGaugeServer.md](SensorBox_For_WebSocketGaugeServer.md).
 
 ## <a name="about">About</a>
 This program (arduino sketch) reads automotive sensor, and send the sensor information by USB-serial port or CAN.
@@ -36,10 +40,10 @@ And this program can output sensor reading data by,
 This sketch needs following hardwares.
 * Arduino Uno or compatible board.
 * To send the data by CAN, MCP2515 board is required.
-	* MCP2515 board is not required on disabling CAN communication features. Don't forget to disable CAN feature by setting `CAN_OBD_ENABLE = false` in `ArduinoCarSignalSensorBox.h`. (otherwise, the program stops on initializing MCP2515)
+	* MCP2515 board is not required on disabling CAN communication features. Don't forget to disable CAN feature by setting `CAN_OBD_ENABLE = false` in [`ArduinoCarSignalSensorBox.h`](ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.h). (otherwise, the program stops on initializing MCP2515)
 * Boost pressure sensor is requred to handle turbo boost (intake manifold) pressure, 
 	* Connect to A0 port.
-	* Autogauge boost sensor(9BBO000/EBOSD-SENSOR) is implemented by default (This outputs voltage of 1V/100kPa). Modify `OBD2ValCovert.ino` to use other types of sensors.
+	* Autogauge boost sensor(9BBO000/EBOSD-SENSOR) is implemented by default (This outputs voltage of 1V/100kPa). Modify [`OBD2ValCovert.ino`](ArduinoCarSignalSensorBox/OBD2ValConvert.ino) to use other types of sensors.
 		* For Autogauge sensor, connect red wire to +12V, black wire to GND, and white wire to A0 port.
 * Temperature sensor is requried to handle engine coolant/oil temperature.
 	* Connect to A1 (for engine coolant temperature), A2 (for engine oil temperature).
@@ -53,10 +57,10 @@ This sketch needs following hardwares.
 
 ## <a name="softsetup">Software(sketch) setup</a>
 ### Setup communication mode
-Before compiling the sketch, check and modify `ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.h` to set the communicationmode.
+Before compiling the sketch, check and modify [`ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.h`](ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.h) to set the communicationmode.
 
 (See [Communication Mode](#communicationmode) for the detail.)
-```
+```c++
 constexpr bool SERIAL_DUMP_ENABLE = false; // Set true to enable "Serial dump" mode.
 constexpr bool SERIAL_INTERACTIVE_ENABLE = false; // Set true to enable "Serial interactive" mode.
 constexpr bool CAN_OBD_ENABLE = true; // Set true to enable "CAN OBDII" mode.
@@ -66,8 +70,8 @@ constexpr bool CAN_OBD_ENABLE = true; // Set true to enable "CAN OBDII" mode.
  * Install [Seeed-Studio/Seeed_Arduino_CAN Ver2.2.0](https://github.com/Seeed-Studio/Seeed_Arduino_CAN/archive/refs/tags/v2.2.0.zip) MCP2515 library.
     * Install zip library file on ArduinoIDE, or copy all of the contents of `src` directory (at the library zip file) to `ArduinoCarSignalSensorBox/` directory. 
 ### Set XTAL frequency and CAN baud rate.
- * Check and modify the argument of `CAN.begin(CAN_250KBPS, MCP_8MHZ)` in `ArduinoCarSignalSensorBox/CANMessageHandle.ino`, follwoing CAN baudrate and the frequency of XTAL of MCP2515 board.
-```
+ * Check and modify the argument of `CAN.begin(CAN_250KBPS, MCP_8MHZ)` in [`ArduinoCarSignalSensorBox/CANMessageHandle.ino`](ArduinoCarSignalSensorBox/CANMessageHandle.ino), follwoing CAN baudrate and the frequency of XTAL of MCP2515 board.
+```c++
 void initializeCAN()
 {
   bool initSucess = false;
@@ -88,7 +92,7 @@ void initializeCAN()
   }
 ```
 ### Compile
-Open `ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.ino` and compile it.
+Open [`ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.ino`](ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.ino) and compile it.
 
 ## <a name="communicationmode">Communication mode</a>
 * ### CAN OBDII mode
@@ -104,7 +108,7 @@ Open `ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.ino` and compile it.
 
 * ### Serial interactive mode
 	* This mode return the sensor reading data by the query command from host.
-	* The query command is single character (see `ArduinoCarSignalSensorBox/SerialPortInteractive.ino`).
+	* The query command is single character (see [`ArduinoCarSignalSensorBox/SerialPortInteractive.ino`](ArduinoCarSignalSensorBox/SerialPortInteractive.ino)).
 		* 'T': Return engine rev in rpm.
         * 'S': Return vehicle speed in km/h.
         * 'B': Return manifold absolute pressure in kPa.
@@ -134,6 +138,27 @@ Open `ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.ino` and compile it.
 
 ## <a name="dependencies">Dependencies</a>
 *  [Seeed-Studio/Seeed_Arduino_CAN](https://github.com/Seeed-Studio/Seeed_Arduino_CAN/) 
+
+## <a name="advancedfeatures">Advanced features</a>
+
+### Change CAN ID (for CAN OBDII mode)
+On default code, CAN ID of this unit is set to `0x7E0`. Therefore, this unit will respond when the incomming message ID is `0x7E0` or `0x7DF`(=request to ALL unit). (see the code below).
+```cpp
+  // Ignore query if the ID do not match with this ECU ID (or 0x7DF(send to all ECU))
+  if((canId != 0x7DF) && (canId != ECU_CAN_ID))
+  {
+    if (CANMSG_DEBUG)
+      Serial.println(F("CAM ID do not match with this ECU's ID."));
+    
+    return;
+  }
+```
+
+To change the CAN ID, modify constexpr in `CANMessageHandle.ino`.
+```cpp
+// ECU (this controller) CAN ID
+constexpr unsigned long ECU_CAN_ID = 0x7E0;
+```
 
 ## <a name="license"> License </a>
 [BSD 3-Clause License](./LICENSE)

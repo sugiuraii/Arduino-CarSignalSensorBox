@@ -11,12 +11,16 @@ mcp2515_can CAN(10); // CAN CS: pin 10
 constexpr int CAN_PAYLOAD_LENGTH = 8;
 
 // ECU (this controller) CAN ID
-constexpr unsigned long ECU_CAN_ID = 0x7E8;
+constexpr unsigned long ECU_CAN_ID = 0x7E0;
+constexpr unsigned long ECU_CAN_RESPONSE_ID = ECU_CAN_ID + 0x008;
 
 // Debug message serial out switch
 constexpr bool CANMSG_DEBUG = false;
 constexpr bool CANMSG_ERROR = true;
 constexpr bool CANMSG_FATAL = true;
+
+// Output CAN handle time (for debug and performance analysis)
+constexpr bool CANMSG_TIME_MEAS = false;
 
 // Return code of buildPIDValueMessage
 constexpr int NOERROR = 0;
@@ -44,6 +48,10 @@ void initializeCAN()
 
 void handleCANMessage()
 {
+  unsigned long canMsgHandleStartTime;
+  if (CANMSG_TIME_MEAS)
+    canMsgHandleStartTime = micros();
+
   if (CANMSG_DEBUG)
     Serial.println(F("CAN message handle start."));
 
@@ -64,6 +72,15 @@ void handleCANMessage()
   {
     Serial.print(F("Msg from canId: "));
     Serial.println(canId, HEX);
+  }
+
+  // Ignore query if the ID do not match with this ECU ID (or 0x7DF(send to all ECU))
+  if((canId != 0x7DF) && (canId != ECU_CAN_ID))
+  {
+    if (CANMSG_DEBUG)
+      Serial.println(F("CAM ID do not match with this ECU's ID."));
+    
+    return;
   }
 
   const uint8_t queryMessageLength = canBuf[0];
@@ -108,8 +125,14 @@ void handleCANMessage()
   }
 
   // Send CAN return message.
-  CAN.sendMsgBuf(ECU_CAN_ID, 0, 8, returnBuf);
+  CAN.sendMsgBuf(ECU_CAN_RESPONSE_ID, 0, 8, returnBuf);
 
+  if(CANMSG_TIME_MEAS)
+  {
+    Serial.print(F("CAN message handle time (micros): "));
+    Serial.println(micros() - canMsgHandleStartTime);
+  }
+  
   if (CANMSG_DEBUG)
   {
     Serial.print(F("Return byte length: "));

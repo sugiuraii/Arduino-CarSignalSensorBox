@@ -5,6 +5,7 @@ using System.IO.Ports;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using System.IO;
+using System.Diagnostics;
 
 namespace ArduinoTachoPulseGeneratorGUI.Service
 {
@@ -22,6 +23,7 @@ namespace ArduinoTachoPulseGeneratorGUI.Service
 
     public class ArduinoTachoPulseGeneratorService : IDisposable
     {
+        private const int TimeoutMilliseconds = 10000;
         private readonly ILogger<ArduinoTachoPulseGeneratorService> logger;
         public event EventHandler<bool> CommunicateStateChanged;
         public event EventHandler<Exception> CommunicateErrorOccured;
@@ -48,6 +50,10 @@ namespace ArduinoTachoPulseGeneratorGUI.Service
                 serialPort.BaudRate = 115200;
                 serialPort.NewLine = "\n";
                 serialPort.Open();
+
+                // Set serialport timeout.
+                serialPort.ReadTimeout = TimeoutMilliseconds;
+                
                 logger.LogInformation("BaudRate is " + serialPort.BaudRate.ToString());
 
                 WaitArduinoReady();
@@ -69,9 +75,10 @@ namespace ArduinoTachoPulseGeneratorGUI.Service
                     CommunicateStateChanged(this, RunningState);
 
             }
-            catch (Exception ex) when ((ex is IOException) || (ex is UnauthorizedAccessException) || (ex is ArgumentException) || (ex is InvalidOperationException))
+            catch (Exception ex) when ((ex is IOException) || (ex is UnauthorizedAccessException) || (ex is ArgumentException) || (ex is InvalidOperationException) || (ex is TimeoutException))
             {
                 logger.LogError(ex.Message);
+                serialPort.Close();
                 CommunicateErrorOccured(this, ex);
             }
         }
@@ -79,33 +86,45 @@ namespace ArduinoTachoPulseGeneratorGUI.Service
         private void WaitArduinoReady()
         {
             logger.LogInformation("Waiting initialize OK message....");
-            while (true)
+            var timeoutStopWatch = new Stopwatch();
+            timeoutStopWatch.Start(); 
+            try
             {
-                string response = serialPort.ReadLine();
-                if (response.Contains("Initialize ok!"))
+                while (true)
                 {
-                    logger.LogInformation("Arduino initialize ok message is received.");
-                    break;
+                    string response = serialPort.ReadLine();
+                    if (response.Contains("Initialize ok!"))
+                    {
+                        logger.LogInformation("Arduino initialize ok message is received.");
+                        break;
+                    }
+                    if (response.Contains("error", StringComparison.OrdinalIgnoreCase) || response.Contains("fail", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException("Arduino initialization is failed. Response is :" + response);
+                    }
+                    if (timeoutStopWatch.ElapsedMilliseconds > TimeoutMilliseconds)
+                        throw new TimeoutException();
                 }
-                if (response.Contains("error", StringComparison.OrdinalIgnoreCase) || response.Contains("fail", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new InvalidOperationException("Arduino initialization is failed. Response is :" + response);
-                }
+            }
+            catch (TimeoutException ex)
+            {
+                throw new TimeoutException("Timeout on waiting arduino ready response.", ex);
             }
         }
 
         public void CommunicateStop()
         {
-            logger.LogInformation("Serial port closing.");
+            logger.LogInformation("Ending serial port communication.");
             if (serialPort != null)
             {
+                logger.LogInformation("Serial port closing.");
                 serialPort.Close();
                 serialPort.Dispose();
+                logger.LogInformation("Serial port closed.");
             }
             this.RunningState = false;
             if (CommunicateStateChanged != null)
                 CommunicateStateChanged(this, RunningState);
-            logger.LogInformation("Serial port closed.");
         }
 
         public uint GetMaxValue(WriteValueType type)

@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ElectronNET.API;
-using ElectronNET.API.Entities;
+using Microsoft.Extensions.Logging;
 using ArduinoTachoPulseGeneratorGUI.Service;
 using ArduinoTachoPulseGeneratorGUI.Model;
 
@@ -28,22 +27,9 @@ namespace ArduinoTachoPulseGeneratorGUI
             services.AddSingleton<ArduinoTachoPulseGeneratorService>();
             services.AddSingleton<ArduinoTachoPulseGeneratorGUIModel>();
         }
-
-        public async void ElectronBootstrap()
-        {
-            var browserWindow = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions
-            {
-                Width = 1152,
-                Height = 940,
-                Show = false
-            });
-            await browserWindow.WebContents.Session.ClearCacheAsync();
-            browserWindow.OnReadyToShow += () => browserWindow.Show();
-            browserWindow.SetTitle("ArduinoTachoPulseGeneratorGUI");
-        }
         
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -56,7 +42,9 @@ namespace ArduinoTachoPulseGeneratorGUI
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            loggerFactory.AddMemory();
+
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
@@ -66,11 +54,6 @@ namespace ArduinoTachoPulseGeneratorGUI
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
-
-            if (HybridSupport.IsElectronActive)
-            {
-                ElectronBootstrap();
-            }
         }
     }
 }
