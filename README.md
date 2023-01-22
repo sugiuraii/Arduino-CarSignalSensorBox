@@ -7,6 +7,7 @@
 * [Software(sketch) setup](#softsetup)
 * [Communication mode](#communicationmode)
 * [Dependencies](#dependencies)
+* [Advanced features](#advancedfeatures)
 * [License](#license)
 
 ## Notice
@@ -137,6 +138,27 @@ Open [`ArduinoCarSignalSensorBox/ArduinoCarSignalSensorBox.ino`](ArduinoCarSigna
 
 ## <a name="dependencies">Dependencies</a>
 *  [Seeed-Studio/Seeed_Arduino_CAN](https://github.com/Seeed-Studio/Seeed_Arduino_CAN/) 
+
+## <a name="advancedfeatures">Advanced features</a>
+
+### Change CAN ID (for CAN OBDII mode)
+On default code, CAN ID of this unit is set to `0x7E0`. Therefore, this unit will respond when the incomming message ID is `0x7E0` or `0x7DF`(=request to ALL unit). (see the code below).
+```cpp
+  // Ignore query if the ID do not match with this ECU ID (or 0x7DF(send to all ECU))
+  if((canId != 0x7DF) && (canId != ECU_CAN_ID))
+  {
+    if (CANMSG_DEBUG)
+      Serial.println(F("CAM ID do not match with this ECU's ID."));
+    
+    return;
+  }
+```
+
+To change the CAN ID, modify constexpr in `CANMessageHandle.ino`.
+```cpp
+// ECU (this controller) CAN ID
+constexpr unsigned long ECU_CAN_ID = 0x7E0;
+```
 
 ## <a name="license"> License </a>
 [BSD 3-Clause License](./LICENSE)
