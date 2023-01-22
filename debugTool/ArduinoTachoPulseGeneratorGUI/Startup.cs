@@ -4,8 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using ElectronNET.API;
-using ElectronNET.API.Entities;
 using ArduinoTachoPulseGeneratorGUI.Service;
 using ArduinoTachoPulseGeneratorGUI.Model;
 
@@ -28,19 +26,6 @@ namespace ArduinoTachoPulseGeneratorGUI
             services.AddServerSideBlazor();
             services.AddSingleton<ArduinoTachoPulseGeneratorService>();
             services.AddSingleton<ArduinoTachoPulseGeneratorGUIModel>();
-        }
-
-        public async void ElectronBootstrap()
-        {
-            var browserWindow = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions
-            {
-                Width = 1152,
-                Height = 940,
-                Show = false
-            });
-            await browserWindow.WebContents.Session.ClearCacheAsync();
-            browserWindow.OnReadyToShow += () => browserWindow.Show();
-            browserWindow.SetTitle("ArduinoTachoPulseGeneratorGUI");
         }
         
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,11 +54,6 @@ namespace ArduinoTachoPulseGeneratorGUI
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
-
-            if (HybridSupport.IsElectronActive)
-            {
-                ElectronBootstrap();
-            }
         }
     }
 }
