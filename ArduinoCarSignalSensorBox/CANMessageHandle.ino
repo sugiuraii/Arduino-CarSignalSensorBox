@@ -7,7 +7,7 @@
 int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID);
 void buildAvailablePIDMessage(byte *returnBuf, uint8_t requestedPID);
 
-mcp2515_can CAN(10); // CAN CS: pin 10
+MCP_CAN CAN(10); // CAN CS: pin 10
 constexpr int CAN_PAYLOAD_LENGTH = 8;
 
 // ECU (this controller) CAN ID
@@ -31,7 +31,7 @@ void initializeCAN()
   bool initSucess = false;
   while (!initSucess)
   {
-    if (CAN_OK == CAN.begin(CAN_250KBPS, MCP_8MHz)) // init can bus : baudrate = 250k
+    if (CAN_OK == CAN.begin(MCP_ANY, CAN_250KBPS, MCP_8MHZ)) // init can bus : baudrate = 250k    
     {
       Serial.println(F("CAN BUS Shield init ok!"));
       initSucess = true;
@@ -59,7 +59,7 @@ void handleCANMessage()
   unsigned long canId;
   unsigned char len;
 
-  CAN.readMsgBufID(&canId, &len, canBuf);
+  CAN.readMsgBuf(&canId, &len, canBuf);
 
   if (len > CAN_PAYLOAD_LENGTH)
   {

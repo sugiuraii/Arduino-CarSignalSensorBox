@@ -1,11 +1,12 @@
 #ifndef CANMESSAGE_HANDLE_H
 #define CANMESSAGE_HANDLE_H
 
-#include "mcp2515_can.h"
+#include "mcp_can.h"
+#include "mcp_can_dfs.h"
 
 void initializeCAN();
 void handleCANMessage();
 
-extern mcp2515_can CAN;
+extern MCP_CAN CAN;
 
 #endif
