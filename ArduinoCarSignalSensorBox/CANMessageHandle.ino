@@ -10,6 +10,9 @@ void buildAvailablePIDMessage(byte *returnBuf, uint8_t requestedPID);
 MCP_CAN CAN(10); // CAN CS: pin 10
 constexpr int CAN_PAYLOAD_LENGTH = 8;
 
+IsoTp isotp(&CAN, 0);
+struct Message_t txMsg;
+
 // ECU (this controller) CAN ID
 constexpr unsigned long ECU_CAN_ID = 0x7E0;
 constexpr unsigned long ECU_CAN_RESPONSE_ID = ECU_CAN_ID + 0x008;
