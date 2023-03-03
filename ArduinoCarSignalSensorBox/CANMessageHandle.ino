@@ -11,7 +11,6 @@ MCP_CAN CAN(10); // CAN CS: pin 10
 constexpr int CAN_PAYLOAD_LENGTH = 8;
 
 IsoTp isotp(&CAN, 0);
-struct Message_t txMsg;
 
 // ECU (this controller) CAN ID
 constexpr unsigned long ECU_CAN_ID = 0x7E0;
@@ -126,10 +125,14 @@ void handleCANMessage()
       return;
     }
   }
-
+  struct Message_t txMsg;
+  txMsg.len = 8;
+  txMsg.rx_id = ECU_CAN_ID;
+  txMsg.tx_id = ECU_CAN_RESPONSE_ID;
+  txMsg.Buffer = returnBuf;
   // Send CAN return message.
-  CAN.sendMsgBuf(ECU_CAN_RESPONSE_ID, 0, 8, returnBuf);
-
+  isotp.send(&txMsg);
+  
   if(CANMSG_TIME_MEAS)
   {
     Serial.print(F("CAN message handle time (micros): "));
