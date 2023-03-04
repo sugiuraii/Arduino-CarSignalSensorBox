@@ -22,15 +22,12 @@ constexpr unsigned long ECU_CAN_RESPONSE_ID = ECU_CAN_ID + 0x008;
 constexpr int ECU_WAIT = 0; 
 
 // Debug message serial out switch
-constexpr bool PIDSET_DEBUG = false;
-constexpr bool PIDSET_ERROR = true;
 constexpr bool CANMSG_DEBUG = false;
 constexpr bool CANMSG_TIME_MEAS = false;
 constexpr bool CANMSG_FREERAM_MEAS = false;
 constexpr bool CANMSG_ERROR = true;
 constexpr bool CANMSG_FATAL = true;
 
-//constexpr int SERIAL_MSG_LENGTH = 11;
 constexpr int CAN_PAYLOAD_LENGTH = 8;
 
 #endif
