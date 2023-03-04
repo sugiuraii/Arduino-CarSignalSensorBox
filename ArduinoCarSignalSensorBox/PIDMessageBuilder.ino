@@ -35,16 +35,18 @@ void fillValueBytes(byte* const returnBuf, const uint8_t requestedPID, const uin
   case 0x05: // PID 0x05 = Engine coolant temperature
   {
     int adcCoolant = analogReadVal[WATERTEMP_ADC_PIN];
-    returnBuf[0] = 1 + 2; // Return 1byte
+    returnBuf[byteOffsetToFill] = requestedPID;   // Fill PID
     returnBuf[byteOffsetToFill + 1] = convertToOBDCoolantTemperature(adcCoolant);
+    byteOffsetAfterFill = byteOffsetToFill + 2;
     return NOERROR;
   }
   break;
   case 0x0B: // PID 0x0B = Manofold absoulte pressure
   {
     int adcManifoldPres = analogReadVal[BOOST_ADC_PIN];
-    returnBuf[0] = 1 + 2; // Return 1byte
+    returnBuf[byteOffsetToFill] = requestedPID;   // Fill PID
     returnBuf[byteOffsetToFill + 1] = convertToOBDManifoldAbsPressure(adcManifoldPres);
+    byteOffsetAfterFill = byteOffsetToFill + 2;
     return NOERROR;
   }
   break;
@@ -53,9 +55,10 @@ void fillValueBytes(byte* const returnBuf, const uint8_t requestedPID, const uin
     unsigned long nowTime = micros();
     unsigned long rpmPulseTime = getTachoPulseElapsedTime(nowTime);
     uint16_t rpmOBDVal = convertToOBDEngineREVx4(rpmPulseTime);
-    returnBuf[0] = 2 + 2; // Return 2byte
+    returnBuf[byteOffsetToFill] = requestedPID;   // Fill PID
     returnBuf[byteOffsetToFill + 1] = (byte)((rpmOBDVal & 0xFF00) >> 8);
     returnBuf[byteOffsetToFill + 2] = (byte)((rpmOBDVal & 0x00FF));
+    byteOffsetAfterFill = byteOffsetToFill + 3;
     return NOERROR;
   }
   break;
@@ -64,8 +67,9 @@ void fillValueBytes(byte* const returnBuf, const uint8_t requestedPID, const uin
     unsigned long nowTime = micros();
     unsigned long vspeedPulseTime = getSpeedPulseElapsedTime(nowTime);
     byte speedOBDDVal = convertToVechicleOBDSpeed(vspeedPulseTime);
-    returnBuf[0] = 1 + 2; // Return 2byte
+    returnBuf[byteOffsetToFill] = requestedPID;   // Fill PID
     returnBuf[byteOffsetToFill + 1] = speedOBDDVal;
+    byteOffsetAfterFill = byteOffsetToFill + 2;
     return NOERROR;
   }
   break;
@@ -73,12 +77,15 @@ void fillValueBytes(byte* const returnBuf, const uint8_t requestedPID, const uin
   {
     int adcOilTemp = analogReadVal[OILTEMP_ADC_PIN];
     returnBuf[0] = 1 + 2; // Return 1byte
+    returnBuf[byteOffsetToFill] = requestedPID;   // Fill PID
     returnBuf[byteOffsetToFill + 1] = convertToOBDEngineOILTemperature(adcOilTemp);
+    byteOffsetAfterFill = byteOffsetToFill + 3;
     return NOERROR;
   }
   break;
   default:
     // Requested PID is not match
+    byteOffsetAfterFill = byteOffsetToFill;
     return PID_NOT_AVAILABLE;
     break;
   }
@@ -119,24 +126,3 @@ void fillAvailablePIDBytes(byte* const returnBuf, const uint8_t requestedPID, co
   }
   byteOffsetAfterFill = byteOffsetToFill + 5;
 }
-
-{
-    const uint8_t valByteLength = pgm_read_byte(PIDByteLengthMap + requestedPID);
-    if (valByteLength == 0) // Skip build return byte when PID is not available
-    {
-      byteOffsetAfterFill = byteOffsetToFill;
-      return;
-    }
-
-    // Fill requested PID to 1st byte
-    returnBuf[byteOffsetToFill] = requestedPID;
-
-    // Fill return value bytes
-    const unsigned int PIDAddressOffset = pgm_read_word(PIDAddressMap + requestedPID);
-    for (uint8_t i = 0; i < valByteLength; i++)
-      returnBuf[byteOffsetToFill + 1 + i] = PID_Value_Map[PIDAddressOffset + i];
-
-    // Finally, set byteOffseytAfterFill
-    byteOffsetAfterFill = byteOffsetToFill + 1 + valByteLength;
-}
-
