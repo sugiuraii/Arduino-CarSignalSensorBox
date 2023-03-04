@@ -29,6 +29,98 @@ int  buildPIDValueMessage(byte* const returnBuf, uint8_t& returnByteCount, const
 
 void fillValueBytes(byte* const returnBuf, const uint8_t requestedPID, const uint8_t byteOffsetToFill, uint8_t& byteOffsetAfterFill)
 {
+  int *analogReadVal = getAnalogReadVal();
+  switch (requestedPID)
+  {
+  case 0x05: // PID 0x05 = Engine coolant temperature
+  {
+    int adcCoolant = analogReadVal[WATERTEMP_ADC_PIN];
+    returnBuf[0] = 1 + 2; // Return 1byte
+    returnBuf[byteOffsetToFill + 1] = convertToOBDCoolantTemperature(adcCoolant);
+    return NOERROR;
+  }
+  break;
+  case 0x0B: // PID 0x0B = Manofold absoulte pressure
+  {
+    int adcManifoldPres = analogReadVal[BOOST_ADC_PIN];
+    returnBuf[0] = 1 + 2; // Return 1byte
+    returnBuf[byteOffsetToFill + 1] = convertToOBDManifoldAbsPressure(adcManifoldPres);
+    return NOERROR;
+  }
+  break;
+  case 0x0C: // PID 0x0C = Engine speed (rpm)
+  {
+    unsigned long nowTime = micros();
+    unsigned long rpmPulseTime = getTachoPulseElapsedTime(nowTime);
+    uint16_t rpmOBDVal = convertToOBDEngineREVx4(rpmPulseTime);
+    returnBuf[0] = 2 + 2; // Return 2byte
+    returnBuf[byteOffsetToFill + 1] = (byte)((rpmOBDVal & 0xFF00) >> 8);
+    returnBuf[byteOffsetToFill + 2] = (byte)((rpmOBDVal & 0x00FF));
+    return NOERROR;
+  }
+  break;
+  case 0x0D: // PID 0x0D = Vehicle speeds
+  {
+    unsigned long nowTime = micros();
+    unsigned long vspeedPulseTime = getSpeedPulseElapsedTime(nowTime);
+    byte speedOBDDVal = convertToVechicleOBDSpeed(vspeedPulseTime);
+    returnBuf[0] = 1 + 2; // Return 2byte
+    returnBuf[byteOffsetToFill + 1] = speedOBDDVal;
+    return NOERROR;
+  }
+  break;
+  case 0x5C: // PID 0x5C = Engine oil temperature
+  {
+    int adcOilTemp = analogReadVal[OILTEMP_ADC_PIN];
+    returnBuf[0] = 1 + 2; // Return 1byte
+    returnBuf[byteOffsetToFill + 1] = convertToOBDEngineOILTemperature(adcOilTemp);
+    return NOERROR;
+  }
+  break;
+  default:
+    // Requested PID is not match
+    return PID_NOT_AVAILABLE;
+    break;
+  }
+}
+
+// Build available PID message (AvailablePID = 0x05, 0x0B, 0x0C, 0x0D, 0x5C)
+void fillAvailablePIDBytes(byte* const returnBuf, const uint8_t requestedPID, const uint8_t byteOffsetToFill, uint8_t& byteOffsetAfterFill)
+{
+  // Fill requested PID to 1st byte
+  returnBuf[byteOffsetToFill] = requestedPID;
+  switch (requestedPID)
+  {
+  case 0x00:
+    returnBuf[byteOffsetToFill + 1] = 0x08;
+    returnBuf[byteOffsetToFill + 2] = 0x38;
+    returnBuf[byteOffsetToFill + 3] = 0x00;
+    returnBuf[byteOffsetToFill + 4] = 0x01;
+    break;
+  case 0x20:
+    returnBuf[byteOffsetToFill + 1] = 0x00;
+    returnBuf[byteOffsetToFill + 2] = 0x00;
+    returnBuf[byteOffsetToFill + 3] = 0x00;
+    returnBuf[byteOffsetToFill + 4] = 0x01;
+    break;
+  case 0x40:
+    returnBuf[byteOffsetToFill + 1] = 0x00;
+    returnBuf[byteOffsetToFill + 2] = 0x00;
+    returnBuf[byteOffsetToFill + 3] = 0x00;
+    returnBuf[byteOffsetToFill + 4] = 0x10;
+    break;
+  default:
+    returnBuf[byteOffsetToFill + 1] = 0x00;
+    returnBuf[byteOffsetToFill + 2] = 0x00;
+    returnBuf[byteOffsetToFill + 3] = 0x00;
+    returnBuf[byteOffsetToFill + 4] = 0x00;
+    if (CANMSG_ERROR)
+      Serial.println(F("Invaild PID is requested on fillAvailablePIDBytes."));
+  }
+  byteOffsetAfterFill = byteOffsetToFill + 5;
+}
+
+{
     const uint8_t valByteLength = pgm_read_byte(PIDByteLengthMap + requestedPID);
     if (valByteLength == 0) // Skip build return byte when PID is not available
     {
@@ -48,16 +140,3 @@ void fillValueBytes(byte* const returnBuf, const uint8_t requestedPID, const uin
     byteOffsetAfterFill = byteOffsetToFill + 1 + valByteLength;
 }
 
-void fillAvailablePIDBytes(byte* const returnBuf, const uint8_t requestedPID, const uint8_t byteOffsetToFill, uint8_t& byteOffsetAfterFill)
-{
-  // Fill requested PID
-  returnBuf[byteOffsetToFill] = requestedPID;
-
-  const int availableMapOffset = (requestedPID / 0x20) * 4;
-
-  returnBuf[byteOffsetToFill + 1] = pgm_read_byte(PIDAvailableFlagMap + availableMapOffset);
-  returnBuf[byteOffsetToFill + 2] = pgm_read_byte(PIDAvailableFlagMap + availableMapOffset + 1);
-  returnBuf[byteOffsetToFill + 3] = pgm_read_byte(PIDAvailableFlagMap + availableMapOffset + 2);
-  returnBuf[byteOffsetToFill + 4] = pgm_read_byte(PIDAvailableFlagMap + availableMapOffset + 3);
-  byteOffsetAfterFill = byteOffsetToFill + 5;
-}
