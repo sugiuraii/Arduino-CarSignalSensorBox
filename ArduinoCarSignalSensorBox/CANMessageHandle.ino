@@ -1,42 +1,21 @@
 #include "CANMesasgeHandle.h"
-#include "OBD2ValConvert.h"
-#include "ADCRead.h"
-#include "TachoSpeedPulseCounter.h"
-#include "SensorADCPinAssign.h"
-
-int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID);
-void buildAvailablePIDMessage(byte *returnBuf, uint8_t requestedPID);
 
 MCP_CAN CAN(10); // CAN CS: pin 10
-constexpr int CAN_PAYLOAD_LENGTH = 8;
-
 IsoTp isotp(&CAN, 0);
 
-// ECU (this controller) CAN ID
-constexpr unsigned long ECU_CAN_ID = 0x7E0;
-constexpr unsigned long ECU_CAN_RESPONSE_ID = ECU_CAN_ID + 0x008;
-
-// Debug message serial out switch
-constexpr bool CANMSG_DEBUG = false;
-constexpr bool CANMSG_ERROR = true;
-constexpr bool CANMSG_FATAL = true;
-
-// Output CAN handle time (for debug and performance analysis)
-constexpr bool CANMSG_TIME_MEAS = false;
-
-// Return code of buildPIDValueMessage
-constexpr int NOERROR = 0;
-constexpr int PID_NOT_AVAILABLE = -1;
+constexpr int RETURN_MSGBUILD_BUF_LENGTH = 128;
+constexpr int PID_LIST_LENGTH = 6;
 
 void initializeCAN()
 {
   bool initSucess = false;
   while (!initSucess)
   {
-    if (CAN_OK == CAN.begin(MCP_ANY, CAN_250KBPS, MCP_8MHZ)) // init can bus : baudrate = 250k    
+    if (CAN_OK == CAN.begin(MCP_ANY, CAN_250KBPS, MCP_8MHZ)) // init can bus : baudrate = 250k
     {
       Serial.println(F("CAN BUS Shield init ok!"));
       initSucess = true;
+      CAN.setMode(MCP_NORMAL);   
     }
     else
     {
@@ -57,11 +36,11 @@ void handleCANMessage()
   if (CANMSG_DEBUG)
     Serial.println(F("CAN message handle start."));
 
-  byte canBuf[CAN_PAYLOAD_LENGTH];
+  byte receivedCANBuf[CAN_PAYLOAD_LENGTH];
   unsigned long canId;
   unsigned char len;
 
-  CAN.readMsgBuf(&canId, &len, canBuf);
+  CAN.readMsgBuf(&canId, &len, receivedCANBuf);
 
   if (len > CAN_PAYLOAD_LENGTH)
   {
@@ -85,15 +64,13 @@ void handleCANMessage()
     return;
   }
 
-  const uint8_t queryMessageLength = canBuf[0];
-  const uint8_t serviceMode = canBuf[1];
-  if (queryMessageLength != 2)
-  {
-    if (CANMSG_ERROR)
-      Serial.println(F("ERROR: CAN query message byte length is not 2."));
+  // Wait time
+  if(ECU_WAIT > 0)
+    delay(ECU_WAIT);
 
-    return;
-  }
+  // Get query message length and check service mode.
+  const uint8_t queryMessageLength = receivedCANBuf[0];
+  const uint8_t serviceMode = receivedCANBuf[1];
   if (serviceMode != 0x01)
   {
     if (CANMSG_ERROR)
@@ -102,152 +79,72 @@ void handleCANMessage()
     return;
   }
 
-  const uint8_t requestedPID = canBuf[2];
+  if(queryMessageLength < 2 || queryMessageLength > 7)
+  {
+    if (CANMSG_ERROR)
+      Serial.println(F("ERROR: CAN query message length needs to be between 2 and 7 (1 to 6 PIDs)."));
+
+    return;
+  }
+
+  // Get query PID codes
+  uint8_t requestedPIDList[PID_LIST_LENGTH];
+  const uint8_t requestedPIDCount = queryMessageLength - 1; // Exclude service mode from query length
+  for(uint8_t i = 0; i < requestedPIDCount; i++)
+    requestedPIDList[i] = receivedCANBuf[i + 2];
+
   if (CANMSG_DEBUG)
   {
     Serial.print(F("PID query: "));
-    Serial.println(requestedPID, HEX);
+    for(uint8_t i = 0; i < requestedPIDCount; i++)
+    {
+      Serial.print(requestedPIDList[i], HEX);
+      if(i == requestedPIDCount - 1)
+        Serial.println();
+      else
+        Serial.print(F(","));
+    }
   }
 
   // Build up CAN return message
   const uint8_t returnServiceMode = serviceMode + 0x40;
-  byte returnBuf[8] = {0x00, returnServiceMode, requestedPID, 0x00, 0x00, 0x00, 0x00, 0x00};
+  byte returnMessageBuf[RETURN_MSGBUILD_BUF_LENGTH];
+  uint8_t returnByteCount;
 
-  if ((requestedPID % 0x20) == 0) // Return supported PID flag mode
-    buildAvailablePIDMessage(returnBuf, requestedPID);
-  else // Return value mode (=> get data from PID_Value_Map in RAM)
+  int pidValMessageResult = buildPIDValueMessage(returnMessageBuf, returnByteCount, requestedPIDList, requestedPIDCount, returnServiceMode);
+  if (pidValMessageResult == PID_NOT_AVAILABLE)
   {
-    int pidValMessageResult = buildPIDValueMessage(returnBuf, requestedPID);
-    if (pidValMessageResult == PID_NOT_AVAILABLE)
-    {
-      if (CANMSG_ERROR)
-        Serial.println(F("ERROR: CAN query PID is not supported."));
-      return;
-    }
+    if (CANMSG_ERROR)
+      Serial.println(F("ERROR: CAN query PID is not supported."));
+    return;
   }
+
+  // Send CAN return message.
   struct Message_t txMsg;
-  txMsg.len = 8;
+  txMsg.len = returnByteCount;
   txMsg.rx_id = ECU_CAN_ID;
   txMsg.tx_id = ECU_CAN_RESPONSE_ID;
-  txMsg.Buffer = returnBuf;
-  // Send CAN return message.
+  txMsg.Buffer = returnMessageBuf;
   isotp.send(&txMsg);
-  
+
   if(CANMSG_TIME_MEAS)
   {
     Serial.print(F("CAN message handle time (micros): "));
     Serial.println(micros() - canMsgHandleStartTime);
   }
-  
   if (CANMSG_DEBUG)
   {
-    Serial.print(F("Return byte length: "));
-    Serial.println(returnBuf[0], DEC);
-    Serial.print(F("Return service mode: "));
-    Serial.println(returnBuf[1], HEX);
-    Serial.print(F("Return PID: "));
-    Serial.println(returnBuf[2], HEX);
     Serial.print(F("Return. Value (with padding): "));
-    for (int i = 3; i < 8; i++)
+    for (int i = 0; i < returnByteCount; i++)
     {
-      Serial.print(returnBuf[i], HEX);
-      if (i == 7)
+      Serial.print(returnMessageBuf[i], HEX);
+      if (i == returnByteCount - 1)
         Serial.println();
       else
         Serial.print(",");
     }
   }
-}
 
-int buildPIDValueMessage(byte *returnBuf, uint8_t requestedPID)
-{
-  int *analogReadVal = getAnalogReadVal();
-  switch (requestedPID)
-  {
-  case 0x05: // PID 0x05 = Engine coolant temperature
-  {
-    int adcCoolant = analogReadVal[WATERTEMP_ADC_PIN];
-    returnBuf[0] = 1 + 2; // Return 1byte
-    returnBuf[3] = convertToOBDCoolantTemperature(adcCoolant);
-    return NOERROR;
-  }
-  break;
-  case 0x0B: // PID 0x0B = Manofold absoulte pressure
-  {
-    int adcManifoldPres = analogReadVal[BOOST_ADC_PIN];
-    returnBuf[0] = 1 + 2; // Return 1byte
-    returnBuf[3] = convertToOBDManifoldAbsPressure(adcManifoldPres);
-    return NOERROR;
-  }
-  break;
-  case 0x0C: // PID 0x0C = Engine speed (rpm)
-  {
-    unsigned long nowTime = micros();
-    unsigned long rpmPulseTime = getTachoPulseElapsedTime(nowTime);
-    uint16_t rpmOBDVal = convertToOBDEngineREVx4(rpmPulseTime);
-    returnBuf[0] = 2 + 2; // Return 2byte
-    returnBuf[3] = (byte)((rpmOBDVal & 0xFF00) >> 8);
-    returnBuf[4] = (byte)((rpmOBDVal & 0x00FF));
-    return NOERROR;
-  }
-  break;
-  case 0x0D: // PID 0x0D = Vehicle speeds
-  {
-    unsigned long nowTime = micros();
-    unsigned long vspeedPulseTime = getSpeedPulseElapsedTime(nowTime);
-    byte speedOBDDVal = convertToVechicleOBDSpeed(vspeedPulseTime);
-    returnBuf[0] = 1 + 2; // Return 2byte
-    returnBuf[3] = speedOBDDVal;
-    return NOERROR;
-  }
-  break;
-  case 0x5C: // PID 0x5C = Engine oil temperature
-  {
-    int adcOilTemp = analogReadVal[OILTEMP_ADC_PIN];
-    returnBuf[0] = 1 + 2; // Return 1byte
-    returnBuf[3] = convertToOBDEngineOILTemperature(adcOilTemp);
-    return NOERROR;
-  }
-  break;
-  default:
-    // Requested PID is not match
-    return PID_NOT_AVAILABLE;
-    break;
-  }
-}
-
-// Build available PID message (AvailablePID = 0x05, 0x0B, 0x0C, 0x0D, 0x5C)
-void buildAvailablePIDMessage(byte *returnBuf, uint8_t requestedPID)
-{
-  const byte valByteLength = 4;
-  const byte returnByteLength = valByteLength + 2;
-  returnBuf[0] = returnByteLength;
-  switch (requestedPID)
-  {
-  case 0x00:
-    returnBuf[3] = 0x08;
-    returnBuf[4] = 0x38;
-    returnBuf[5] = 0x00;
-    returnBuf[6] = 0x01;
-    break;
-  case 0x20:
-    returnBuf[3] = 0x00;
-    returnBuf[4] = 0x00;
-    returnBuf[5] = 0x00;
-    returnBuf[6] = 0x01;
-    break;
-  case 0x40:
-    returnBuf[3] = 0x00;
-    returnBuf[4] = 0x00;
-    returnBuf[5] = 0x00;
-    returnBuf[6] = 0x10;
-    break;
-  default:
-    returnBuf[3] = 0x00;
-    returnBuf[4] = 0x00;
-    returnBuf[5] = 0x00;
-    returnBuf[6] = 0x00;
-    if (CANMSG_ERROR)
-      Serial.println(F("Invaild PID is requested on buildAvailanblePIDMessage."));
-  }
+  if(CANMSG_FREERAM_MEAS)
+    display_freeram();
 }
