@@ -67,7 +67,7 @@ constexpr bool CAN_OBD_ENABLE = true; // Set true to enable "CAN OBDII" mode.
 ```
 ### Install MCP2515 library
  * This step is required even if the CAN communication features is disabled by `CAN_OBD_ENABLE = false`
- * Install [Seeed-Studio/Seeed_Arduino_CAN Ver2.2.0](https://github.com/Seeed-Studio/Seeed_Arduino_CAN/archive/refs/tags/v2.2.0.zip) MCP2515 library.
+ * And please install[coryjfowler/MCP_CAN_lib](https://github.com/coryjfowler/MCP_CAN_lib) MCP2515 library and [altelch/iso-tp](https://github.com/altelch/iso-tp) ISO-TP library.
     * Install zip library file on ArduinoIDE, or copy all of the contents of `src` directory (at the library zip file) to `ArduinoCarSignalSensorBox/` directory. 
 ### Set XTAL frequency and CAN baud rate.
  * Check and modify the argument of `CAN.begin(CAN_250KBPS, MCP_8MHZ)` in [`ArduinoCarSignalSensorBox/CANMessageHandle.ino`](ArduinoCarSignalSensorBox/CANMessageHandle.ino), follwoing CAN baudrate and the frequency of XTAL of MCP2515 board.
